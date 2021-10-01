@@ -2,9 +2,10 @@
   "name": "ooctechquestbot",
   "version": "0.0.0",
   "description": "A telegram bot made for fun and games",
-  "main": "main.ts",
+  "main": "main.js",
   "scripts": {
     "start": "nodemon main.ts",
+    "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Filipe Kiss <hello@filipekiss.com.br>",

@@ -1,3 +1,5 @@
 export const BOT_TOKEN: string = ""
 
 export const ARCHIVE_CHANNEL_ID: string = ""
+
+export const BOT_USERNAME: string = ""

@@ -1,5 +1,5 @@
 import { Bot } from "grammy";
-import { ARCHIVE_CHANNEL_ID, BOT_TOKEN } from "./environment"
+import { ARCHIVE_CHANNEL_ID, BOT_TOKEN, BOT_USERNAME } from "./environment"
 
 
 const bot = new Bot(BOT_TOKEN);
@@ -7,8 +7,9 @@ const bot = new Bot(BOT_TOKEN);
 bot.on("::mention", ctx => {
   console.log("Bot was mentioned");
   const receivedMessage = ctx.update.message;
+  const isPureMention = ctx.update.message?.text === BOT_USERNAME;
 
-  if (receivedMessage && receivedMessage.reply_to_message) {
+  if (isPureMention && receivedMessage && receivedMessage.reply_to_message) {
     console.log("The message was a reply, forwarding to archive channel")
     const messageToQuote = receivedMessage.reply_to_message;
     console.log(messageToQuote);
@@ -18,3 +19,5 @@ bot.on("::mention", ctx => {
 })
 
 bot.start();
+
+console.log("Starting")
