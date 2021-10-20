@@ -1,1 +1,5 @@
-environment.ts
+#environment.ts
+
+# dependencies
+/node_modules
+/.vscode

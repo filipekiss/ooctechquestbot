@@ -6,6 +6,8 @@ import {
   NodeCanvasRenderingContext2DSettings,
   CanvasRenderingContext2D,
 } from "canvas";
+import * as fs from 'fs';
+
 import { ASSETS_FOLDER } from '../environment';
 
 const primaryTextColor = "#FFFFFF";
@@ -90,19 +92,25 @@ interface QuoteDetails {
 }
 
 export const generateQuoteImage = async (quote: QuoteDetails) => {
-		const passportTemplate = `${ASSETS_FOLDER}/clouds.jpg`;
-		const quoteText = `‟${quote.text}”`
+  const filesInFolder = fs.readdirSync(ASSETS_FOLDER)
+  console.log(filesInFolder)
+
+  //const passportTemplate = `${ASSETS_FOLDER}/clouds.jpg`;
+  const passportTemplate = `${ASSETS_FOLDER}/${filesInFolder[Math.floor(Math.random() * filesInFolder.length)]}`
+  console.log(`Random image file selected: ${passportTemplate}`)
+
+  const quoteText = `‟${quote.text}”`
 
   const { canvas, ctx } = await getQuoteTemplate(passportTemplate);
 
   // add user friend-code
-		ctx.font = `italic 96px Helvetica`
+  ctx.font = `italic 96px Helvetica`
   ctx.fillStyle = primaryTextColor;
-		printAtWordWrap(ctx, quoteText, 96, 100, 200, 1420);
+  printAtWordWrap(ctx, quoteText, 96, 100, 200, 1420);
 
-		ctx.font = `italic 48px Helvetica`
-		const {width: textSize} = getTextSize(quote.author, 48);
-		ctx.fillText(quote.author, 1500 - textSize, 600)
+  ctx.font = `italic 48px Helvetica`
+  const {width: textSize} = getTextSize(quote.author, 48);
+  ctx.fillText(quote.author, 1500 - textSize, 600)
 
-		return canvas.toBuffer();
+  return canvas.toBuffer();
 };
