@@ -1,5 +1,5 @@
 import { Bot, InputFile } from "grammy";
-import { ARCHIVE_CHANNEL_ID, BOT_TOKEN, BOT_USERNAME } from "./environment";
+import { ARCHIVE_CHANNEL_ID, BOT_TOKEN, BOT_USERNAME, ASSETS_FOLDER } from "./environment";
 import { generateQuoteImage } from "./helpers/generate-quote-image";
 
 const bot = new Bot(BOT_TOKEN);
@@ -19,7 +19,7 @@ bot.on("::mention", async (ctx) => {
       receivedMessage.chat.id,
       messageToQuote.message_id
     );
-    if (messageToQuote.text != undefined) {
+    if (messageToQuote.text !== undefined) {
       ctx.api.sendPhoto(
         ARCHIVE_CHANNEL_ID,
         new InputFile(
@@ -36,4 +36,8 @@ bot.on("::mention", async (ctx) => {
 
 bot.start();
 
-console.log("Starting");
+console.log(`Using BOT_TOKEN: ${BOT_TOKEN}`)
+console.log(`Using BOT_USERNAME: ${BOT_USERNAME}`)
+console.log(`Using ARCHIVE_CHANNEL_ID: ${ARCHIVE_CHANNEL_ID}`)
+console.log(`Using ASSETS_FOLDER: ${ASSETS_FOLDER}`)
+console.log("Starting...");
