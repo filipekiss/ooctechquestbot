@@ -1,6 +1,5 @@
-#environment.ts
-
 # dependencies
 /node_modules
 /.vscode
 dist
+.env

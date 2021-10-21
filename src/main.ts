@@ -1,6 +1,22 @@
 import { Bot, InputFile } from "grammy";
-import { ARCHIVE_CHANNEL_ID, BOT_TOKEN, BOT_USERNAME, ASSETS_FOLDER } from "./environment";
+import {
+  ARCHIVE_CHANNEL_ID,
+  BOT_TOKEN,
+  BOT_USERNAME,
+  ASSETS_FOLDER,
+} from "./environment";
 import { generateQuoteImage } from "./helpers/generate-quote-image";
+
+function abortIfEmpty(key: string, value: unknown) {
+  if (value === undefined || value === null || value === "") {
+    throw new Error(`${key} cannot be "${value}"`);
+  }
+  console.log(`Using ${key}: ${value}`);
+}
+abortIfEmpty(`BOT_TOKEN`, BOT_TOKEN);
+abortIfEmpty(`BOT_USERNAME`, BOT_USERNAME);
+abortIfEmpty(`ARCHIVE_CHANNEL_ID`, ARCHIVE_CHANNEL_ID);
+abortIfEmpty(`ASSETS_FOLDER`, ASSETS_FOLDER);
 
 const bot = new Bot(BOT_TOKEN);
 const botUsername = BOT_USERNAME.toLowerCase();
@@ -36,8 +52,4 @@ bot.on("::mention", async (ctx) => {
 
 bot.start();
 
-console.log(`Using BOT_TOKEN: ${BOT_TOKEN}`)
-console.log(`Using BOT_USERNAME: ${BOT_USERNAME}`)
-console.log(`Using ARCHIVE_CHANNEL_ID: ${ARCHIVE_CHANNEL_ID}`)
-console.log(`Using ASSETS_FOLDER: ${ASSETS_FOLDER}`)
 console.log("Starting...");
