@@ -3,7 +3,8 @@ import {
   ARCHIVE_CHANNEL_ID,
   BOT_TOKEN,
   BOT_USERNAME,
-  ASSETS_FOLDER,
+  CUSTOM_ASSETS_FOLDER,
+  DEFAULT_ASSETS_FOLDER,
 } from "./environment";
 import { generateQuoteImage } from "./helpers/generate-quote-image";
 
@@ -16,7 +17,8 @@ function abortIfEmpty(key: string, value: unknown) {
 abortIfEmpty(`BOT_TOKEN`, BOT_TOKEN);
 abortIfEmpty(`BOT_USERNAME`, BOT_USERNAME);
 abortIfEmpty(`ARCHIVE_CHANNEL_ID`, ARCHIVE_CHANNEL_ID);
-abortIfEmpty(`ASSETS_FOLDER`, ASSETS_FOLDER);
+abortIfEmpty(`DEFAULT_ASSETS_FOLDER`, DEFAULT_ASSETS_FOLDER);
+abortIfEmpty(`CUSTOM_ASSETS_FOLDER`, CUSTOM_ASSETS_FOLDER);
 
 const bot = new Bot(BOT_TOKEN);
 const botUsername = BOT_USERNAME.toLowerCase();
@@ -50,6 +52,11 @@ bot.on("::mention", async (ctx) => {
   }
 });
 
-bot.start();
+bot.start({
+  onStart: (bot) => {
+    console.log(`Started...`);
+    console.log({ bot });
+  },
+});
 
 console.log("Starting...");
