@@ -1,9 +1,12 @@
 FROM node:14
 WORKDIR /app
 
-COPY . .
+COPY package*.json ./
 RUN rm -rf node_modules
+RUN npm ci 
 
-RUN npm install
+COPY . .
 
-CMD ["npm", "start"]
+RUN npm run build
+
+CMD ["node", "dist/main.js"]
