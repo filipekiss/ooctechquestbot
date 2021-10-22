@@ -99,6 +99,7 @@ function printAtWordWrap(
 interface QuoteDetails {
   text: string;
   author: string;
+  query?: string;
 }
 
 function resolvePathTo(path: string) {
@@ -107,7 +108,7 @@ function resolvePathTo(path: string) {
   };
 }
 
-function getQuoteTemplate() {
+function getQuoteTemplate(query?: string) {
   let templateFiles = fs
     .readdirSync(DEFAULT_ASSETS_FOLDER)
     .map(resolvePathTo(DEFAULT_ASSETS_FOLDER));
@@ -119,6 +120,17 @@ function getQuoteTemplate() {
   } finally {
     console.log({ templateFiles });
 
+    if (query) {
+      const eligibleFiles = templateFiles.filter((template) =>
+        template.includes(query)
+      );
+      console.log({ eligibleFiles });
+      const quoteTemplate =
+        eligibleFiles[Math.floor(Math.random() * eligibleFiles.length)];
+      console.log(`Random image file selected: ${quoteTemplate}`);
+      return quoteTemplate;
+    }
+
     const quoteTemplate =
       templateFiles[Math.floor(Math.random() * templateFiles.length)];
     console.log(`Random image file selected: ${quoteTemplate}`);
@@ -128,7 +140,7 @@ function getQuoteTemplate() {
 }
 
 export const generateQuoteImage = async (quote: QuoteDetails) => {
-  const quoteTemplateLocation = getQuoteTemplate();
+  const quoteTemplateLocation = getQuoteTemplate(quote.query);
   const quoteText = `‟${quote.text}”`;
 
   const { canvas, ctx } = await createCanvasFromImage(quoteTemplateLocation);

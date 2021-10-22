@@ -7,6 +7,7 @@ import {
   DEFAULT_ASSETS_FOLDER,
 } from "./environment";
 import { generateQuoteImage } from "./helpers/generate-quote-image";
+import { parseArguments } from "./helpers/message";
 
 function abortIfEmpty(key: string, value: unknown) {
   if (value === undefined || value === null || value === "") {
@@ -26,10 +27,13 @@ const botUsername = BOT_USERNAME.toLowerCase();
 bot.on("::mention", async (ctx) => {
   console.log("Bot was mentioned");
   const receivedMessage = ctx.update.message;
-  const isPureMention = ctx.update.message?.text?.toLowerCase() === botUsername;
+  const isPureMention = receivedMessage.text
+    ?.toLowerCase()
+    .startsWith(botUsername);
 
   if (isPureMention && receivedMessage && receivedMessage.reply_to_message) {
     console.log("The message was a reply, forwarding to archive channel");
+    const [action] = parseArguments(receivedMessage.text);
     const messageToQuote = receivedMessage.reply_to_message;
     console.log(messageToQuote);
     ctx.api.forwardMessage(
@@ -45,6 +49,7 @@ bot.on("::mention", async (ctx) => {
             text: messageToQuote.text,
             author:
               messageToQuote.from!.username ?? messageToQuote.from!.first_name,
+            query: action,
           })
         )
       );
