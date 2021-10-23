@@ -6,7 +6,7 @@ import {
   NodeCanvasRenderingContext2DSettings,
   CanvasRenderingContext2D,
 } from "canvas";
-import { join as joinPath, resolve } from "path";
+import { basename, join as joinPath, resolve } from "path";
 import * as fs from "fs";
 
 import { CUSTOM_ASSETS_FOLDER, DEFAULT_ASSETS_FOLDER } from "../environment";
@@ -106,6 +106,25 @@ function resolvePathTo(path: string) {
   return (to: string) => {
     return resolve(path, to);
   };
+}
+
+export function listAvailableTemplates(folders: string[]) {
+  return [...folders]
+    .map((folder) => {
+      try {
+        return fs
+          .readdirSync(folder)
+          .map(resolvePathTo(folder))
+          .filter((file) => file.endsWith(".jpg"))
+          .map((file) => {
+            return basename(file, ".jpg");
+          });
+      } catch {
+        return null;
+      }
+    })
+    .filter((x) => x)
+    .flat();
 }
 
 function getQuoteTemplate(query?: string) {

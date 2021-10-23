@@ -6,7 +6,10 @@ import {
   CUSTOM_ASSETS_FOLDER,
   DEFAULT_ASSETS_FOLDER,
 } from "./environment";
-import { generateQuoteImage } from "./helpers/generate-quote-image";
+import {
+  generateQuoteImage,
+  listAvailableTemplates,
+} from "./helpers/generate-quote-image";
 import { parseArguments } from "./helpers/message";
 
 function abortIfEmpty(key: string, value: unknown) {
@@ -55,6 +58,14 @@ bot.on("::mention", async (ctx) => {
       );
     }
   }
+});
+
+bot.command("images", (ctx) => {
+  const availableImages = listAvailableTemplates([
+    DEFAULT_ASSETS_FOLDER,
+    CUSTOM_ASSETS_FOLDER,
+  ]);
+  ctx.reply(availableImages.join("\n"));
 });
 
 bot.start({
