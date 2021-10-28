@@ -1,4 +1,4 @@
-import { Bot, InputFile } from "grammy";
+import { Bot, Context, InputFile } from "grammy";
 import {
   ARCHIVE_CHANNEL_ID,
   BOT_TOKEN,
@@ -11,6 +11,12 @@ import {
   listAvailableTemplates,
 } from "./helpers/generate-quote-image";
 import { parseArguments } from "./helpers/message";
+import { hydrate, HydrateFlavor } from "@grammyjs/hydrate";
+import {
+  fireworksAnimation,
+  AnimationDefinition,
+  Animation,
+} from "./animations/fireworks";
 
 function abortIfEmpty(key: string, value: unknown) {
   if (value === undefined || value === null || value === "") {
@@ -24,19 +30,22 @@ abortIfEmpty(`ARCHIVE_CHANNEL_ID`, ARCHIVE_CHANNEL_ID);
 abortIfEmpty(`DEFAULT_ASSETS_FOLDER`, DEFAULT_ASSETS_FOLDER);
 abortIfEmpty(`CUSTOM_ASSETS_FOLDER`, CUSTOM_ASSETS_FOLDER);
 
-const bot = new Bot(BOT_TOKEN);
+type OocContext = HydrateFlavor<Context>;
+
+const bot = new Bot<OocContext>(BOT_TOKEN);
 const botUsername = BOT_USERNAME.toLowerCase();
 
-bot.on("::mention", async (ctx) => {
+bot.use(hydrate());
+bot.on("message:text").on("::mention", async (ctx) => {
   console.log("Bot was mentioned");
   const receivedMessage = ctx.update.message;
   const isPureMention = receivedMessage.text
-    ?.toLowerCase()
+    .toLowerCase()
     .startsWith(botUsername);
 
   if (isPureMention && receivedMessage && receivedMessage.reply_to_message) {
     console.log("The message was a reply, forwarding to archive channel");
-    const [action] = parseArguments(receivedMessage.text);
+    const [action] = parseArguments(receivedMessage.text!);
     const messageToQuote = receivedMessage.reply_to_message;
     console.log(messageToQuote);
     ctx.api.forwardMessage(
@@ -66,6 +75,42 @@ bot.command("images", (ctx) => {
     CUSTOM_ASSETS_FOLDER,
   ]);
   ctx.reply(availableImages.join("\n"));
+});
+
+function isAnimationDefinition(
+  x: Animation | AnimationDefinition
+): x is AnimationDefinition {
+  if ("tick" in x) {
+    return true;
+  }
+  return false;
+}
+
+function createAnimatedMessage(animation: Animation | AnimationDefinition) {
+  let animationFrames: Animation;
+  let animationSpeed = 1000;
+  if (isAnimationDefinition(animation)) {
+    animationFrames = animation.frames;
+    animationSpeed = animation.tick;
+  } else {
+    animationFrames = animation;
+  }
+  return async function (ctx: OocContext) {
+    const [firstFrame, ...restOfFrames] = animationFrames;
+    const acendeMsg = await ctx.reply(firstFrame.join("\n"));
+    restOfFrames.map((frame, index) => {
+      setTimeout(async () => {
+        await acendeMsg.editText(frame.join("\n"));
+      }, (index + 1) * animationSpeed);
+    });
+  };
+}
+
+bot.command("acende", createAnimatedMessage(fireworksAnimation));
+bot.on("message:text", (ctx) => {
+  if (ctx.message.text.toLowerCase() === "/acende@papocobot") {
+    createAnimatedMessage(fireworksAnimation)(ctx);
+  }
 });
 
 bot.start({
