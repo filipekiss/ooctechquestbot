@@ -1,6 +1,7 @@
 import {hydrate} from "@grammyjs/hydrate";
 import {Bot} from "grammy";
 import {acende} from "./acende";
+import {badumts} from "./badumts";
 import {OocContext, setup} from "./config";
 import {BOT_TOKEN} from "./config/environment";
 import {ooc} from "./ooc";
@@ -11,7 +12,9 @@ setup();
 const bot = new Bot<OocContext>(BOT_TOKEN);
 
 bot.use(hydrate());
+bot.use(badumts);
 bot.use(ooc);
+// this must come last
 bot.use(acende);
 
 console.log("Starting...");
