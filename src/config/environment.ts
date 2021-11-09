@@ -2,7 +2,11 @@ import { config } from "dotenv";
 import { existsSync as fileExists } from "fs";
 import { resolve } from "path";
 
-const ENV_FILE = resolve(__dirname, "../.env");
+export const APP_FOLDER = resolve(__dirname, "../../");
+
+console.log(`APP_FOLDER ${APP_FOLDER}`);
+
+const ENV_FILE = resolve(APP_FOLDER, ".env");
 console.log(`Looking for ${ENV_FILE}`);
 if (fileExists(ENV_FILE)) {
   console.log(`Using ENV_FILE: ${ENV_FILE}`);
@@ -19,7 +23,7 @@ export const ARCHIVE_CHANNEL_ID: string = process.env.ARCHIVE_CHANNEL_ID ?? "";
 
 export const BOT_USERNAME: string = process.env.BOT_USERNAME ?? "";
 
-export const DEFAULT_ASSETS_FOLDER = resolve(__dirname, "../assets");
+export const DEFAULT_ASSETS_FOLDER = resolve(APP_FOLDER, "./assets");
 
 export const CUSTOM_ASSETS_FOLDER: string =
   process.env.CUSTOM_ASSETS_FOLDER ?? "/assets";

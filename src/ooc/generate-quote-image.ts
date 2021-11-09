@@ -9,7 +9,7 @@ import {
 import { basename, join as joinPath, resolve } from "path";
 import * as fs from "fs";
 
-import { CUSTOM_ASSETS_FOLDER, DEFAULT_ASSETS_FOLDER } from "../environment";
+import { CUSTOM_ASSETS_FOLDER, DEFAULT_ASSETS_FOLDER } from "../config/environment";
 
 const primaryTextColor = "#FFFFFF";
 const secondaryTextColor = "#9D9B89";
