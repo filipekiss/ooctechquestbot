@@ -1,7 +1,8 @@
 import { Composer, InputFile } from "grammy";
 import { ARCHIVE_CHANNEL_ID, BOT_USERNAME } from "../config/environment";
-import { generateQuoteImage } from "./generate-quote-image";
 import { parseArguments } from "../telegram/messages";
+import { generateQuoteImage } from "./generate-quote-image";
+import { removeSurroundingQuotes } from "./remove-surrounding-quotes";
 
 export const ooc = new Composer();
 
@@ -24,11 +25,12 @@ ooc.on("message:text").on("::mention", async (ctx) => {
       messageToQuote.message_id
     );
     if (messageToQuote.text !== undefined) {
+      const quoteText = removeSurroundingQuotes(messageToQuote.text);
       ctx.api.sendPhoto(
         ARCHIVE_CHANNEL_ID,
         new InputFile(
           await generateQuoteImage({
-            text: messageToQuote.text,
+            text: quoteText,
             author:
               messageToQuote.from!.username ?? messageToQuote.from!.first_name,
             query: action,
