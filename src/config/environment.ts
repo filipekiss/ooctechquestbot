@@ -3,8 +3,10 @@ import { existsSync as fileExists } from "fs";
 import { resolve } from "path";
 
 export const APP_FOLDER = resolve(__dirname, "../../");
+export const DB_FOLDER = resolve(APP_FOLDER, './db');
 
 console.log(`APP_FOLDER ${APP_FOLDER}`);
+console.log(`DB_FOLDER ${DB_FOLDER}`);
 
 const ENV_FILE = resolve(APP_FOLDER, ".env");
 console.log(`Looking for ${ENV_FILE}`);
