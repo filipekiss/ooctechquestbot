@@ -28,10 +28,13 @@ async function getStreakData(latestIncidentDate: string) {
   const previousIncidentDate = await reportDB.get(
     REPORT_SCHEMA.LAST_INCIDENT_DATE
   );
-  const previousStreak =
+  const previousStreak: number =
     (await reportDB.get(REPORT_SCHEMA.LONGEST_STREAK)) || 0;
-  const currentStreak = calculateStreakDifference(latestIncidentDate, previousIncidentDate);
-  const longestStreak = Math.max(currentStreak, previousStreak || 0);
+  const currentStreak = calculateStreakDifference(
+    latestIncidentDate,
+    previousIncidentDate
+  );
+  const longestStreak = Math.max(currentStreak, previousStreak);
   return {
     previousIncidentDate,
     previousStreak,
@@ -40,38 +43,41 @@ async function getStreakData(latestIncidentDate: string) {
   };
 }
 
-async function updateStreakIfNeeded(currentStreak: number, previousStreak: number) {
-    if (currentStreak >= previousStreak) {
-      await reportDB.set(REPORT_SCHEMA.LONGEST_STREAK, currentStreak);
-    }
+async function updateStreakWithLargest(
+  currentStreak: number,
+  previousStreak: number
+) {
+    await reportDB.set(REPORT_SCHEMA.LONGEST_STREAK, Math.max(currentStreak, previousStreak));
 }
 
 async function replyAlreadyReported(ctx: OocContext) {
-    const receivedMessage = ctx.message!
-      const botReply = await ctx.reply("Essa mensagem já foi reportada.", {
-        reply_to_message_id: receivedMessage.message_id,
-      });
-      setTimeout(async () => {
-        try {
-          await receivedMessage.delete();
-          await botReply.delete();
-        } catch {
-          console.warn("Unable to delete message. Skipping…");
-        }
-      }, 15000);
-      return;
+  const receivedMessage = ctx.message!;
+  const botReply = await ctx.reply("Essa mensagem já foi reportada.", {
+    reply_to_message_id: receivedMessage.message_id,
+  });
+  setTimeout(async () => {
+    try {
+      await receivedMessage.delete();
+      await botReply.delete();
+    } catch {
+      console.warn("Unable to delete message. Skipping…");
+    }
+  }, 15000);
+  return;
 }
 
-
-  const today = format(new Date(), "T");
+const today = format(new Date(), "T");
 
 async function sendReport(ctx: OocContext, isReport?: boolean) {
-    const streakData = await getStreakData(today);
-    return ctx.reply(
-      `Estamos há ${streakData.currentStreak} sem mencionar nazismo no grupo. Nosso recorde é de ${streakData.longestStreak} dias.`, {
-        reply_to_message_id: isReport ? ctx.message!.reply_to_message!.message_id : undefined
-      }
-    );
+  const streakData = await getStreakData(today);
+  return ctx.reply(
+    `Estamos há ${streakData.currentStreak} dias sem mencionar nazismo no grupo. Nosso recorde é de ${streakData.longestStreak} dias.`,
+    {
+      reply_to_message_id: isReport
+        ? ctx.message!.reply_to_message!.message_id
+        : undefined,
+    }
+  );
 }
 
 // command without reply
@@ -92,8 +98,8 @@ report.filter(isReply).command(`report`, async (ctx) => {
     if (await reportDB.get(reportedMessage.message_id.toString())) {
       return replyAlreadyReported(ctx);
     }
-    const { longestStreak, previousStreak } = await getStreakData(today);
-    updateStreakIfNeeded(longestStreak, previousStreak)
+    const { longestStreak, currentStreak } = await getStreakData(today);
+    updateStreakWithLargest(longestStreak, currentStreak);
     await reportDB.set(REPORT_SCHEMA.LAST_INCIDENT_DATE, today);
     await reportDB.set(
       REPORT_SCHEMA.LAST_REPORTED_MESSAGE_ID,
@@ -101,7 +107,6 @@ report.filter(isReply).command(`report`, async (ctx) => {
     );
     await reportDB.set(reportedMessage.message_id.toString(), reportedMessage);
 
-    // update longest_streak
     return sendReport(ctx, true);
   }
 });
