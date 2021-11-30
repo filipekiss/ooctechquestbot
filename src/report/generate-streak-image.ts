@@ -4,14 +4,9 @@ import {
   CUSTOM_ASSETS_FOLDER,
   DEFAULT_ASSETS_FOLDER,
 } from "../config/environment";
-import {
-  createCanvasFromImage,
-  getTextSize,
-  printAtWordWrap,
-} from "../libs/image";
+import { createCanvasFromImage, printAtWordWrap } from "../libs/image";
 
-const primaryTextColor = "#FFFFFF";
-const secondaryTextColor = "#9D9B89";
+const primaryTextColor = "#001";
 
 interface QuoteDetails {
   text: string;
@@ -75,20 +70,20 @@ function getQuoteTemplate(query?: string) {
   }
 }
 
-export const generateQuoteImage = async (quote: QuoteDetails) => {
-  const quoteTemplateLocation = getQuoteTemplate(quote.query);
-  const quoteText = `‟${quote.text}”`;
+export const generateStreakImage = async (
+  currentStreak: string,
+  longestStreak: string
+) => {
+  const { canvas, ctx } = await createCanvasFromImage(
+    resolve(__dirname, "./frame.png")
+  );
 
-  const { canvas, ctx } = await createCanvasFromImage(quoteTemplateLocation);
+  let fontSize = 88;
 
-  // add user friend-code
-  ctx.font = `italic 96px Helvetica`;
+  ctx.font = `italic ${fontSize}px Helvetica`;
   ctx.fillStyle = primaryTextColor;
-  printAtWordWrap(ctx, quoteText, 96, 100, 200, 1420);
-
-  ctx.font = `italic 48px Helvetica`;
-  const { width: textSize } = getTextSize(quote.author, 48);
-  ctx.fillText(quote.author, 1500 - textSize, 600);
+  printAtWordWrap(ctx, currentStreak, fontSize, 1050, 270, 1000);
+  printAtWordWrap(ctx, longestStreak, fontSize, 1180, 630, 1000);
 
   return canvas.toBuffer();
 };

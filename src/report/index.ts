@@ -1,9 +1,10 @@
 import { differenceInCalendarDays, format, parse } from "date-fns";
 import { Composer } from "grammy";
-import { ReplyMessage } from "grammy/out/platform";
+import { InputFile, ReplyMessage } from "grammy/out/platform";
 import Keyv from "keyv";
 import { OocContext } from "../config";
 import { DB_FOLDER } from "../config/environment";
+import { generateStreakImage } from "./generate-streak-image";
 import { isReply } from "./is-message-reply.filter";
 
 const REPORT_SCHEMA = {
@@ -24,7 +25,7 @@ function calculateStreakDifference(laterDate: string, earlierDate: string) {
 const reportDB = new Keyv(`sqlite://${DB_FOLDER}/report.sqlite`);
 export const report = new Composer<OocContext>();
 
-async function getStreakData(latestIncidentDate: string) {
+export async function getStreakData(latestIncidentDate: string) {
   const previousIncidentDate = await reportDB.get(
     REPORT_SCHEMA.LAST_INCIDENT_DATE
   );
@@ -47,7 +48,10 @@ async function updateStreakWithLargest(
   currentStreak: number,
   previousStreak: number
 ) {
-    await reportDB.set(REPORT_SCHEMA.LONGEST_STREAK, Math.max(currentStreak, previousStreak));
+  await reportDB.set(
+    REPORT_SCHEMA.LONGEST_STREAK,
+    Math.max(currentStreak, previousStreak)
+  );
 }
 
 async function replyAlreadyReported(ctx: OocContext) {
@@ -70,14 +74,19 @@ const today = format(new Date(), "T");
 
 async function sendReport(ctx: OocContext, isReport?: boolean) {
   const streakData = await getStreakData(today);
-  return ctx.reply(
-    `Estamos há ${streakData.currentStreak} dias sem mencionar nazismo no grupo. Nosso recorde é de ${streakData.longestStreak} dias.`,
-    {
-      reply_to_message_id: isReport
-        ? ctx.message!.reply_to_message!.message_id
-        : undefined,
-    }
-  );
+    return ctx.replyWithPhoto(
+      new InputFile(
+        await generateStreakImage(
+          streakData.currentStreak.toString(),
+          streakData.longestStreak.toString()
+        )
+      ),
+      {
+        reply_to_message_id: isReport
+          ? ctx.message!.reply_to_message!.message_id
+          : undefined,
+      }
+    );
 }
 
 // command without reply
