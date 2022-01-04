@@ -14,10 +14,10 @@ const REPORT_SCHEMA = {
 };
 
 function calculateStreakDifference(laterDate: string, earlierDate: string) {
-  if (!laterDate || !earlierDate) {
-    return differenceInCalendarDays(new Date(), new Date());
-  }
   const parsedLaterDate = parse(laterDate, "T", new Date());
+  if (!earlierDate) {
+    return differenceInCalendarDays(parsedLaterDate, new Date());
+  }
   const parsedEarlierDate = parse(earlierDate, "T", new Date());
   return differenceInCalendarDays(parsedLaterDate, parsedEarlierDate);
 }
