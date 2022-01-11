@@ -82,8 +82,8 @@ export const generateStreakImage = async (
 
   ctx.font = `italic ${fontSize}px Helvetica`;
   ctx.fillStyle = primaryTextColor;
-  printAtWordWrap(ctx, currentStreak, fontSize, 1050, 270, 1000);
-  printAtWordWrap(ctx, longestStreak, fontSize, 1180, 630, 1000);
+  printAtWordWrap(ctx, currentStreak, fontSize, 1050, 275, 1000);
+  printAtWordWrap(ctx, longestStreak, fontSize, 1145, 635, 1000);
 
   return canvas.toBuffer();
 };

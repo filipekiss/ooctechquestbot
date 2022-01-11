@@ -73,6 +73,7 @@ async function replyAlreadyReported(ctx: OocContext) {
 const today = format(new Date(), "T");
 
 async function sendReport(ctx: OocContext, isReport?: boolean) {
+  await ctx.replyWithChatAction("upload_photo");
   const streakData = await getStreakData(today);
     return ctx.replyWithPhoto(
       new InputFile(
