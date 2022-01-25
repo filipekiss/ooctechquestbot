@@ -6,6 +6,7 @@ import {OocContext, setup} from "./config";
 import {BOT_TOKEN} from "./config/environment";
 import {ooc} from "./ooc";
 import {report} from "./report";
+import {nft} from "./nft";
 
 setup();
 
@@ -17,6 +18,7 @@ bot.use(badumts);
 bot.use(ooc);
 bot.use(report);
 // this must come last
+bot.use(nft);
 bot.use(acende);
 
 console.log("Starting...");
