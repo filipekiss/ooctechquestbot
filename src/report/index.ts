@@ -117,6 +117,12 @@ report.filter(isReply).command(`report`, async (ctx) => {
     );
     await reportDB.set(reportedMessage.message_id.toString(), reportedMessage);
 
-    return sendReport(ctx, true);
+    return sendReport(ctx, true).then(async () => {
+    try {
+      await receivedMessage.delete();
+    } catch {
+      console.error('Unable to delete message. Skipping...')
+    }
+    })
   }
 });
