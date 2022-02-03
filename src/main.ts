@@ -7,6 +7,7 @@ import {BOT_TOKEN} from "./config/environment";
 import {ooc} from "./ooc";
 import {report} from "./report";
 import {nft} from "./nft";
+import { revolta } from "./revolta";
 
 setup();
 
@@ -15,9 +16,10 @@ const bot = new Bot<OocContext>(BOT_TOKEN);
 
 bot.use(hydrate());
 bot.use(badumts);
+bot.use(revolta);
 bot.use(ooc);
 bot.use(report);
-// this must come last
+// these must come last
 bot.use(nft);
 bot.use(acende);
 
