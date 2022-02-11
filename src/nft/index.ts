@@ -109,6 +109,7 @@ async function replyInvalidMeaning(ctx: OocContext) {
 
 nft.command("mint", async (ctx) => {
   const [n, f, t] = ctx.match.split(" ");
+  if (!n || !f || !t) return false
   const isValidNFT = validateNftMeaning(n, f, t);
   if (!isValidNFT) {
     return replyInvalidMeaning(ctx);
