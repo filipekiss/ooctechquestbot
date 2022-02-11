@@ -91,7 +91,7 @@ async function replyAlreadyAdded(ctx: OocContext) {
 async function replyInvalidMeaning(ctx: OocContext) {
   const receivedMessage = ctx.message!;
   const botReply = await ctx.reply(
-    `${ctx.match} não é um significado válido para NFT`,
+    `"${ctx.match}" não é um significado válido para NFT. As palavras devem começar com N, F e T, na ordem.`,
     {
       reply_to_message_id: receivedMessage.message_id,
     }
@@ -103,7 +103,7 @@ async function replyInvalidMeaning(ctx: OocContext) {
     } catch {
       console.warn("Unable to delete message. Skipping…");
     }
-  }, 15000);
+  }, 60000);
   return;
 }
 
