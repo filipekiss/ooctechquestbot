@@ -53,7 +53,7 @@ const isValidMeaning = (x: string, startWith: string) =>
   x.toLowerCase().startsWith(startWith);
 const titleCase = (word: string) => `${word[0].toUpperCase()}${word.slice(1)}`;
 
-const validateNftMeaning = (n: string, f: string, t: string) => {
+const isValidNftMeaning = (n: string, f: string, t: string) => {
   const isNValid = isValidMeaning(n, "n");
   const isFValid = isValidMeaning(f, "f");
   const isTValid = isValidMeaning(t, "t");
@@ -109,11 +109,7 @@ async function replyInvalidMeaning(ctx: OocContext) {
 
 nft.command("mint", async (ctx) => {
   const [n, f, t] = ctx.match.split(" ");
-  if (!n || !f || !t) return false
-  const isValidNFT = validateNftMeaning(n, f, t);
-  if (!isValidNFT) {
-    return replyInvalidMeaning(ctx);
-  }
+  if (!n || !f || !t || !isValidNftMeaning(n, f, t)) return replyInvalidMeaning(ctx)
   const definition = {
     n: titleCase(n),
     f: titleCase(f),
