@@ -4,6 +4,7 @@ import { InputFile, ReplyMessage } from "grammy/out/platform";
 import Keyv from "keyv";
 import { OocContext } from "../config";
 import { DB_FOLDER } from "../config/environment";
+import { BotModule } from "../main";
 import { generateStreakImage } from "./generate-streak-image";
 import { isReply } from "./is-message-reply.filter";
 
@@ -75,19 +76,19 @@ const today = format(new Date(), "T");
 async function sendReport(ctx: OocContext, isReport?: boolean) {
   await ctx.replyWithChatAction("upload_photo");
   const streakData = await getStreakData(today);
-    return ctx.replyWithPhoto(
-      new InputFile(
-        await generateStreakImage(
-          streakData.currentStreak.toString(),
-          streakData.longestStreak.toString()
-        )
-      ),
-      {
-        reply_to_message_id: isReport
-          ? ctx.message!.reply_to_message!.message_id
-          : undefined,
-      }
-    );
+  return ctx.replyWithPhoto(
+    new InputFile(
+      await generateStreakImage(
+        streakData.currentStreak.toString(),
+        streakData.longestStreak.toString()
+      )
+    ),
+    {
+      reply_to_message_id: isReport
+        ? ctx.message!.reply_to_message!.message_id
+        : undefined,
+    }
+  );
 }
 
 // command without reply
@@ -118,11 +119,19 @@ report.filter(isReply).command(`report`, async (ctx) => {
     await reportDB.set(reportedMessage.message_id.toString(), reportedMessage);
 
     return sendReport(ctx, true).then(async () => {
-    try {
-      await receivedMessage.delete();
-    } catch {
-      console.error('Unable to delete message. Skipping...')
-    }
-    })
+      try {
+        await receivedMessage.delete();
+      } catch {
+        console.error("Unable to delete message. Skipping...");
+      }
+    });
   }
 });
+
+export const reportModule: BotModule = {
+  composer: report,
+  command: "report",
+  shortDescription: "Reporta uma mensagem e zera o contador",
+  description:
+    "Se enviado como reposta a uma mensagem, reporta aquela mensagem e zera o contador. Se enviado sem responder, apenas mostra o recorde atual.",
+};

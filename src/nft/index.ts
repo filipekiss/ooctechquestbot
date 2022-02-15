@@ -157,3 +157,11 @@ nft.command("mint", async (ctx) => {
   deleteMessage(botReply, timeout);
   return;
 });
+
+export const nftModule = {
+  composer: nft,
+  command: "mint",
+  shortDescription: "Adiciona uma nova definição para NFT",
+  description:
+    "Use esse comando para adicionar uma definição para NFT. O comando precisa seguir o formato `/mint <significado>` onde significado precisa ser uma frase de três palavras que comecem com N, F e T, respectivamente.",
+};
