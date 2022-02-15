@@ -69,6 +69,7 @@ const help = (commandsRegister: any) => {
       });
       return ctx.reply(lines.join("\n"), {
         reply_to_message_id: receivedMessage.message_id,
+        parse_mode: "MarkdownV2",
       });
     }
     const module = commandRegister.get(commandHelp as string);
@@ -83,6 +84,7 @@ const help = (commandsRegister: any) => {
     }
     ctx.reply(lines.join("\n"), {
       reply_to_message_id: receivedMessage.message_id,
+      parse_mode: "MarkdownV2",
     });
   });
   return helpModule;
