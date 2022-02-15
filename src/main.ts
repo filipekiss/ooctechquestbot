@@ -51,21 +51,21 @@ const help = (commandsRegister: any) => {
     }
     const lines = [];
     if (!commandHelp) {
-      lines.push("---");
+      lines.push("———");
       lines.push("");
       lines.push(
         "Se você responder a uma mensagem mencionando o bot, a mensagem é encaminhada para o canal t.me/ooctechquest"
       );
       lines.push("");
       lines.push("Comandos");
-      lines.push("-----------");
+      lines.push("———————————");
       lines.push("");
       lines.push(
         "Você pode solicitar ajuda pra um comando específico, por exemplo: `/ajuda luciano` para ver ajuda do comando `luciano`"
       );
       lines.push("");
       commandsRegister.forEach((botModule: any, command: string) => {
-        lines.push(`/${command} - ${botModule.shortDescription}`);
+        lines.push(`/${command} — ${botModule.shortDescription}`);
       });
       return ctx.reply(lines.join("\n"), {
         reply_to_message_id: receivedMessage.message_id,
@@ -75,9 +75,9 @@ const help = (commandsRegister: any) => {
     const module = commandRegister.get(commandHelp as string);
     if (module) {
       if (module?.description) {
-        lines.push(`/${module.command} - ${module.description}`);
+        lines.push(`/${module.command} — ${module.description}`);
       } else {
-        lines.push(`/${module.command} - ${module.shortDescription}`);
+        lines.push(`/${module.command} — ${module.shortDescription}`);
       }
     } else {
       lines.push(`Não encontrei nenhuma ajuda pro comando ${commandHelp}`);
