@@ -3,6 +3,7 @@ import { OocContext } from "../config";
 import { DB_FOLDER } from "../config/environment";
 import Keyv from "keyv";
 import { ReplyMessage } from "@grammyjs/types";
+import { MessageX } from "@grammyjs/hydrate/out/data/message";
 
 const NFT_Meanings = [
   "Não Faço Trabalho",
@@ -20,17 +21,23 @@ const NFT_Meanings = [
   "Neerlandês Fazendo Tulipa",
 ];
 
-export const nft = new Composer<OocContext>();
-nft.hears(/nft/i, async (ctx) => {
-  const receivedMessage = ctx.message!;
+async function getNftMeaning() {
   const definitionListStr = (await nftDB.get(
     NFT_SCHEMA.NFT_MESSAGES
   )) as string;
   const definitionList = definitionListStr ? definitionListStr.split("\n") : [];
-  const allMeanings = [...NFT_Meanings, ...definitionList];
-  console.log(allMeanings)
-  const nftMeaning =
-    allMeanings[Math.floor(Math.random() * allMeanings.length)];
+  const allMeanings = new Set([...NFT_Meanings, ...definitionList]);
+  return {
+    random: () =>
+      [...allMeanings][Math.floor(Math.random() * allMeanings.size)],
+    all: () => [...allMeanings],
+  };
+}
+
+export const nft = new Composer<OocContext>();
+nft.hears(/nft/i, async (ctx) => {
+  const receivedMessage = ctx.message!;
+  const nftMeaning = (await getNftMeaning()).random();
   return await ctx.reply(`NFT significa "${nftMeaning}"`, {
     reply_to_message_id: receivedMessage.message_id,
   });
@@ -77,14 +84,8 @@ async function replyAlreadyAdded(ctx: OocContext) {
   const botReply = await ctx.reply("Essa definição já existe.", {
     reply_to_message_id: receivedMessage.message_id,
   });
-  setTimeout(async () => {
-    try {
-      await receivedMessage.delete();
-      await botReply.delete();
-    } catch {
-      console.warn("Unable to delete message. Skipping…");
-    }
-  }, 15000);
+  deleteMessage(receivedMessage, 15000);
+  deleteMessage(botReply, 15000);
   return;
 }
 
@@ -96,20 +97,46 @@ async function replyInvalidMeaning(ctx: OocContext) {
       reply_to_message_id: receivedMessage.message_id,
     }
   );
-  setTimeout(async () => {
-    try {
-      await receivedMessage.delete();
-      await botReply.delete();
-    } catch {
-      console.warn("Unable to delete message. Skipping…");
-    }
-  }, 60000);
+  deleteMessage(receivedMessage, 60000);
+  deleteMessage(botReply, 60000);
   return;
 }
 
+async function sendNftList(ctx: OocContext) {
+  const allMeanings = (await getNftMeaning()).all();
+  const receivedMessage = ctx.message!;
+  const botReply = await ctx.reply(
+    `Significados de NFT: \n${allMeanings
+      .sort(new Intl.Collator("pt-br").compare)
+      .join("\n")}`,
+    {
+      parse_mode: "MarkdownV2",
+    }
+  );
+  const timeout = 60000;
+  deleteMessage(receivedMessage, timeout);
+  deleteMessage(botReply, timeout);
+  return;
+}
+
+function deleteMessage(message: MessageX, timeout: number) {
+  setTimeout(async () => {
+    try {
+      await message.delete();
+    } catch {
+      console.warn("Unable to delete message. Skipping…");
+    }
+  }, timeout);
+}
+
 nft.command("mint", async (ctx) => {
+  const action = ctx.match;
+  if (action === "list") {
+    return sendNftList(ctx);
+  }
   const [n, f, t] = ctx.match.split(" ");
-  if (!n || !f || !t || !isValidNftMeaning(n, f, t)) return replyInvalidMeaning(ctx)
+  if (!n || !f || !t || !isValidNftMeaning(n, f, t))
+    return replyInvalidMeaning(ctx);
   const definition = {
     n: titleCase(n),
     f: titleCase(f),
@@ -125,13 +152,8 @@ nft.command("mint", async (ctx) => {
   const botReply = await ctx.reply(`Definição adicionada`, {
     reply_to_message_id: receivedMessage.message_id,
   });
-  setTimeout(async () => {
-    try {
-      await receivedMessage.delete();
-      await botReply.delete();
-    } catch {
-      console.warn("Unable to delete message. Skipping…");
-    }
-  }, 15000);
+  const timeout = 15000;
+  deleteMessage(receivedMessage, timeout);
+  deleteMessage(botReply, timeout);
   return;
 });
