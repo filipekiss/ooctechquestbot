@@ -77,6 +77,9 @@ function getQuoteTemplate(query?: string) {
 
 export const generateQuoteImage = async (quote: QuoteDetails) => {
   const quoteTemplateLocation = getQuoteTemplate(quote.query);
+  if (!quoteTemplateLocation) {
+    return false;
+  }
   const quoteText = `‟${quote.text}”`;
 
   const { canvas, ctx } = await createCanvasFromImage(quoteTemplateLocation);

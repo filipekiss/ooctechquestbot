@@ -26,17 +26,19 @@ ooc.on("message:text").on("::mention", async (ctx) => {
     );
     if (messageToQuote.text !== undefined) {
       const quoteText = removeSurroundingQuotes(messageToQuote.text);
-      ctx.api.sendPhoto(
-        ARCHIVE_CHANNEL_ID,
-        new InputFile(
-          await generateQuoteImage({
-            text: quoteText,
-            author:
-              messageToQuote.from!.username ?? messageToQuote.from!.first_name,
-            query: action,
-          })
-        )
-      );
+      const generatedImage = await generateQuoteImage({
+        text: quoteText,
+        author:
+          messageToQuote.from!.username ?? messageToQuote.from!.first_name,
+        query: action,
+      });
+      if (generatedImage) {
+        return ctx.api.sendPhoto(
+          ARCHIVE_CHANNEL_ID,
+          new InputFile(generatedImage)
+        );
+      }
+      return true;
     }
   }
 });

@@ -38,6 +38,10 @@ const addModuleToBot = (module: BotModule) => {
   bot.use(module.composer);
 };
 
+function mdEscape(text: string): string {
+  return text.replace(/[_*[\]()~`>#+\-=|{}.!\\]/g, "\\$&");
+}
+
 const help = (commandsRegister: any) => {
   const helpModule = new Composer<OocContext>();
   helpModule.command(["ajuda"], async (ctx: OocContext) => {
@@ -67,7 +71,7 @@ const help = (commandsRegister: any) => {
       commandsRegister.forEach((botModule: any, command: string) => {
         lines.push(`/${command} — ${botModule.shortDescription}`);
       });
-      return ctx.reply(lines.join("\n"), {
+      return ctx.reply(mdEscape(lines.join("\n")), {
         reply_to_message_id: receivedMessage.message_id,
         parse_mode: "MarkdownV2",
       });
@@ -82,7 +86,7 @@ const help = (commandsRegister: any) => {
     } else {
       lines.push(`Não encontrei nenhuma ajuda pro comando ${commandHelp}`);
     }
-    ctx.reply(lines.join("\n"), {
+    ctx.reply(mdEscape(lines.join("\n")), {
       reply_to_message_id: receivedMessage.message_id,
       parse_mode: "MarkdownV2",
     });
