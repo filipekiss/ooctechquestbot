@@ -8,6 +8,7 @@ import { ooc } from "./ooc";
 import { reportModule } from "./report";
 import { nftModule } from "./nft";
 import { revoltaModule } from "./revolta";
+import { keyboardModule } from "./keyboard";
 
 setup();
 console.log("Starting...");
@@ -70,6 +71,9 @@ const help = (commandsRegister: any) => {
       lines.push("");
       commandsRegister.forEach((botModule: any, command: string) => {
         lines.push(`/${command} — ${botModule.shortDescription}`);
+        if (botModule.alias?.length > 0) {
+          lines.push(`Aliases: ${botModule.alias.join(", ")}`)
+        }
       });
       return ctx.reply(mdEscape(lines.join("\n")), {
         reply_to_message_id: receivedMessage.message_id,
@@ -100,6 +104,7 @@ addModuleToBot(badumtsModule);
 addModuleToBot(nftModule);
 addModuleToBot(revoltaModule);
 addModuleToBot(reportModule);
+addModuleToBot(keyboardModule)
 bot.use(help(commandRegister));
 // these must come last
 bot.use(acende);
