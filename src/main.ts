@@ -9,6 +9,7 @@ import { reportModule } from "./report";
 import { nftModule } from "./nft";
 import { revoltaModule } from "./revolta";
 import { keyboardModule } from "./keyboard";
+import { repetidaModule } from "./repetida";
 
 setup();
 console.log("Starting...");
@@ -72,7 +73,7 @@ const help = (commandsRegister: any) => {
       commandsRegister.forEach((botModule: any, command: string) => {
         lines.push(`/${command} — ${botModule.shortDescription}`);
         if (botModule.alias?.length > 0) {
-          lines.push(`Aliases: ${botModule.alias.join(", ")}`)
+          lines.push(`Aliases: ${botModule.alias.join(", ")}`);
         }
       });
       return ctx.reply(mdEscape(lines.join("\n")), {
@@ -104,7 +105,8 @@ addModuleToBot(badumtsModule);
 addModuleToBot(nftModule);
 addModuleToBot(revoltaModule);
 addModuleToBot(reportModule);
-addModuleToBot(keyboardModule)
+addModuleToBot(keyboardModule);
+addModuleToBot(repetidaModule);
 bot.use(help(commandRegister));
 // these must come last
 bot.use(acende);
