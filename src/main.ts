@@ -10,6 +10,7 @@ import { nftModule } from "./nft";
 import { revoltaModule } from "./revolta";
 import { keyboardModule } from "./keyboard";
 import { repetidaModule } from "./repetida";
+import { paolica } from './paolica';
 
 setup();
 console.log("Starting...");
@@ -101,6 +102,7 @@ const help = (commandsRegister: any) => {
 
 bot.use(hydrate());
 bot.use(ooc);
+bot.use(paolica);
 addModuleToBot(badumtsModule);
 addModuleToBot(nftModule);
 addModuleToBot(revoltaModule);
