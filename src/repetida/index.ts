@@ -1,14 +1,14 @@
-import { Composer } from "grammy";
+import { Composer, InputFile } from "grammy";
 import { OocContext } from "../config";
+import { DEFAULT_AUDIO_FOLDER } from "../config/environment";
 import { BotModule } from "../main";
 
 export const repetida = new Composer<OocContext>();
 
 const sendAudio = async (ctx: OocContext) => {
-  // const antigona = "CQACAgEAAx0CZUsXQwACApliISZknHFeHITeOv9c8DnAMCThiwAC9wADP5jIRphn4M0WiPo0IwQ"
   const audioIds = [
-    "CQACAgEAAx0CZUsXQwACAp5iISciClw-vLHy1Baca5CeJteiOQACAgEAAoDziEab33OndJuvESME", // boca de leite
-    "CQACAgEAAx0CZUsXQwACAp9iIScpAbddAAG6j8osvbeTsMPfuowAAsACAALzqQhFs6F_mBY_jMAjBA", // repetida
+    new InputFile(DEFAULT_AUDIO_FOLDER + '/boca-de-leite.aac'),
+    new InputFile(DEFAULT_AUDIO_FOLDER + '/repetida.mp3')
   ];
 
   const receivedMessage = ctx.update.message;
@@ -16,6 +16,7 @@ const sendAudio = async (ctx: OocContext) => {
   if (!receivedMessage?.reply_to_message && !isTrigger) {
     return;
   }
+  await ctx.replyWithChatAction("upload_voice");
   const fileId = audioIds[Math.floor(Math.random() * audioIds.length)];
   await ctx.replyWithAudio(fileId, {
     reply_to_message_id: receivedMessage?.reply_to_message?.message_id,

@@ -26,6 +26,7 @@ export const ARCHIVE_CHANNEL_ID: string = process.env.ARCHIVE_CHANNEL_ID ?? "";
 export const BOT_USERNAME: string = process.env.BOT_USERNAME ?? "";
 
 export const DEFAULT_ASSETS_FOLDER = resolve(APP_FOLDER, "./assets");
+export const DEFAULT_AUDIO_FOLDER = resolve(APP_FOLDER, "./audio");
 
 export const CUSTOM_ASSETS_FOLDER: string =
   process.env.CUSTOM_ASSETS_FOLDER ?? "/assets";
