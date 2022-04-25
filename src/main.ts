@@ -103,8 +103,6 @@ const help = (commandsRegister: any) => {
 
 bot.use(hydrate());
 bot.use(ooc);
-bot.use(paolica);
-bot.use(salpicao);
 addModuleToBot(badumtsModule);
 addModuleToBot(nftModule);
 addModuleToBot(revoltaModule);
@@ -113,6 +111,8 @@ addModuleToBot(keyboardModule);
 addModuleToBot(repetidaModule);
 bot.use(help(commandRegister));
 // these must come last
+bot.use(paolica);
+bot.use(salpicao);
 bot.use(acende);
 
 bot.start({
