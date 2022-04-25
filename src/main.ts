@@ -11,6 +11,7 @@ import { revoltaModule } from "./revolta";
 import { keyboardModule } from "./keyboard";
 import { repetidaModule } from "./repetida";
 import { paolica } from './paolica';
+import { salpicao } from "./salpicao";
 
 setup();
 console.log("Starting...");
@@ -103,6 +104,7 @@ const help = (commandsRegister: any) => {
 bot.use(hydrate());
 bot.use(ooc);
 bot.use(paolica);
+bot.use(salpicao);
 addModuleToBot(badumtsModule);
 addModuleToBot(nftModule);
 addModuleToBot(revoltaModule);
