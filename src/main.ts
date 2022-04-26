@@ -10,8 +10,9 @@ import { nftModule } from "./nft";
 import { revoltaModule } from "./revolta";
 import { keyboardModule } from "./keyboard";
 import { repetidaModule } from "./repetida";
-import { paolica } from './paolica';
+import { paolica } from "./paolica";
 import { salpicao } from "./salpicao";
+import { banModule } from "./ban";
 
 setup();
 console.log("Starting...");
@@ -109,6 +110,7 @@ addModuleToBot(revoltaModule);
 addModuleToBot(reportModule);
 addModuleToBot(keyboardModule);
 addModuleToBot(repetidaModule);
+addModuleToBot(banModule);
 bot.use(help(commandRegister));
 // these must come last
 bot.use(paolica);
