@@ -2,7 +2,7 @@ import { Composer } from "grammy";
 import { OocContext } from "../config";
 
 const magazinePattern =
-  /^(http(?:s)?:\/\/(?:www.)?magazinevoce.com.br)\/([^\/]+)\/(.*)/gm;
+  /(http(?:s)?:\/\/(?:www.)?magazinevoce.com.br)\/([^\/]+)\/(.*)/gm;
 
 const magazineTransformer = (matches: RegExpMatchArray) => {
   const [, magazineUrl, , productDetails] = matches;

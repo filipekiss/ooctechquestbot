@@ -104,7 +104,6 @@ const help = (commandsRegister: any) => {
 };
 
 bot.use(hydrate());
-bot.use(ooc);
 addModuleToBot(badumtsModule);
 addModuleToBot(nftModule);
 addModuleToBot(revoltaModule);
@@ -118,6 +117,7 @@ bot.use(paolica);
 bot.use(salpicao);
 bot.use(magazine);
 bot.use(acende);
+bot.use(ooc);
 
 bot.start({
   onStart: (bot) => {
