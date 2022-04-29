@@ -16,6 +16,7 @@ import { banModule } from "./ban";
 import { magazine } from "./magazine";
 import { americanas } from "./americanas";
 import { ali } from "./ali";
+import { amazon } from "./amazon";
 
 setup();
 console.log("Starting...");
@@ -120,6 +121,7 @@ bot.use(salpicao);
 bot.use(magazine);
 bot.use(americanas);
 bot.use(ali);
+bot.use(amazon);
 bot.use(acende);
 bot.use(ooc);
 
