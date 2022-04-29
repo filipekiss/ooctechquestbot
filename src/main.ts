@@ -13,6 +13,7 @@ import { repetidaModule } from "./repetida";
 import { paolica } from "./paolica";
 import { salpicao } from "./salpicao";
 import { banModule } from "./ban";
+import { magazine } from "./magazine";
 
 setup();
 console.log("Starting...");
@@ -115,6 +116,7 @@ bot.use(help(commandRegister));
 // these must come last
 bot.use(paolica);
 bot.use(salpicao);
+bot.use(magazine);
 bot.use(acende);
 
 bot.start({
