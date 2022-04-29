@@ -14,6 +14,7 @@ import { paolica } from "./paolica";
 import { salpicao } from "./salpicao";
 import { banModule } from "./ban";
 import { magazine } from "./magazine";
+import { americanas } from "./americanas";
 
 setup();
 console.log("Starting...");
@@ -116,6 +117,7 @@ bot.use(help(commandRegister));
 bot.use(paolica);
 bot.use(salpicao);
 bot.use(magazine);
+bot.use(americanas);
 bot.use(acende);
 bot.use(ooc);
 
