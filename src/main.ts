@@ -15,6 +15,7 @@ import { salpicao } from "./salpicao";
 import { banModule } from "./ban";
 import { magazine } from "./magazine";
 import { americanas } from "./americanas";
+import { ali } from "./ali";
 
 setup();
 console.log("Starting...");
@@ -118,6 +119,7 @@ bot.use(paolica);
 bot.use(salpicao);
 bot.use(magazine);
 bot.use(americanas);
+bot.use(ali);
 bot.use(acende);
 bot.use(ooc);
 
