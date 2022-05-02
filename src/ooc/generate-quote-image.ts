@@ -57,10 +57,13 @@ function getQuoteTemplate(query?: string) {
     console.log({ templateFiles });
 
     if (query) {
-      const eligibleFiles = templateFiles.filter((template) =>
+      let eligibleFiles = templateFiles.filter((template) =>
         template.includes(query)
       );
       console.log({ eligibleFiles });
+      if (eligibleFiles.length === 0) {
+        eligibleFiles = templateFiles;
+      }
       const quoteTemplate =
         eligibleFiles[Math.floor(Math.random() * eligibleFiles.length)];
       console.log(`Random image file selected: ${quoteTemplate}`);
