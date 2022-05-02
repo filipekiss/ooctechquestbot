@@ -17,6 +17,7 @@ import { magazine } from "./magazine";
 import { americanas } from "./americanas";
 import { ali } from "./ali";
 import { amazon } from "./amazon";
+import { wow } from "./wow";
 
 setup();
 console.log("Starting...");
@@ -47,8 +48,8 @@ const addModuleToBot = (module: BotModule) => {
   bot.use(module.composer);
 };
 
-function mdEscape(text: string): string {
-  return text.replace(/[_*[\]()~`>#+\-=|{}.!\\]/g, "\\$&");
+export function mdEscape(text: string): string {
+  return text.replace(/[[\]()~`>#+\-=|{}.!\\]/g, "\\$&");
 }
 
 const help = (commandsRegister: any) => {
@@ -122,6 +123,7 @@ bot.use(magazine);
 bot.use(americanas);
 bot.use(ali);
 bot.use(amazon);
+bot.use(wow);
 bot.use(acende);
 bot.use(ooc);
 
