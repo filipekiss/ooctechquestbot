@@ -14,7 +14,6 @@ wow.hears(wowPattern, async (ctx) => {
   const [wow] = await got(wowApi).json<
     [
       {
-        audio: string;
         movie: string;
         year: number;
         full_line: string;
@@ -26,8 +25,7 @@ wow.hears(wowPattern, async (ctx) => {
     ]
   >();
   const sendSomething = Math.floor(Math.random() * 10);
-  if (sendSomething > 7) return;
-  const sendVideo = Math.floor(Math.random() * 10);
+  if (sendSomething > 1) return;
   const receivedMessage = ctx.message as Message;
   const replyMessageOptions = {
     reply_to_message_id:
@@ -38,11 +36,6 @@ wow.hears(wowPattern, async (ctx) => {
     ),
     parse_mode: "MarkdownV2" as ParseMode,
   };
-  if (sendVideo > 2) {
-    await ctx.replyWithChatAction("upload_voice");
-    await ctx.replyWithAudio(wow.audio, replyMessageOptions);
-    return;
-  }
   await ctx.replyWithChatAction("upload_video");
   await ctx.replyWithVideo(wow.video["720p"], replyMessageOptions);
 });
