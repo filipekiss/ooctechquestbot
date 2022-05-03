@@ -27,7 +27,7 @@ wow.hears(wowPattern, async (ctx) => {
   >();
   const sendSomething = Math.floor(Math.random() * 10);
   if (sendSomething > 7) return;
-  const sendVideo = Math.floor(Math.random() * sendSomething);
+  const sendVideo = Math.floor(Math.random() * 10);
   const receivedMessage = ctx.message as Message;
   const replyMessageOptions = {
     reply_to_message_id:
