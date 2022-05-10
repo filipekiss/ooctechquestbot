@@ -2,12 +2,11 @@ import { Composer } from "grammy";
 import { OocContext } from "../config";
 
 const amazonPattern =
-  /(https:\/\/(?:www.)?amazon.com.br)\/([^\/]*)\/([^\/]*)\/([^\/]*)\//gm;
-
+  /(https:\/\/(?:www.)?amazon.com.br)\/(?:[^\/]+\/)?dp\/([^\/?]+)/gm;
 const amazonTransformer = (matches: RegExpMatchArray) => {
-  const [, amazonUrl, productDescription, code, id] = matches;
+  const [, amazonUrl, id] = matches;
   const affiliate = "?tag=mq08-20";
-  return `${amazonUrl}/${productDescription}/${code}/${id}${affiliate}`;
+  return `${amazonUrl}/dp/${id}${affiliate}`;
 };
 
 export const amazon = new Composer<OocContext>();
