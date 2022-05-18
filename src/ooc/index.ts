@@ -10,8 +10,9 @@ export const ooc = new Composer<OocContext>();
 const STEALTH_ACTION = "stealth";
 
 const botUsername = BOT_USERNAME.toLowerCase();
-ooc.on("message:text", async (ctx) => {
-  console.log("Bot was mentioned");
+ooc.on("message:text", async (ctx, next) => {
+  const chatInfo = await ctx.getChat();
+  console.log(chatInfo);
   const receivedMessage = ctx.update.message;
   const isPureMention = receivedMessage.text
     .toLowerCase()
@@ -52,13 +53,10 @@ ooc.on("message:text", async (ctx) => {
           query: action,
         });
         if (generatedImage) {
-          return ctx.api.sendPhoto(
-            ARCHIVE_CHANNEL_ID,
-            new InputFile(generatedImage)
-          );
+          ctx.api.sendPhoto(ARCHIVE_CHANNEL_ID, new InputFile(generatedImage));
         }
-        return true;
       }
     }
   }
+  await next();
 });

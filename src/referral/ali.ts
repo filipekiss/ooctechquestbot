@@ -1,4 +1,4 @@
-import { Composer } from "grammy";
+import { Composer, InlineKeyboard } from "grammy";
 import { OocContext } from "../config";
 
 const aliPattern = /(https:\/\/(?:www.)?aliexpress.com\/item\/.*.html)/gm;
@@ -14,8 +14,10 @@ export const ali = new Composer<OocContext>();
 ali.hears(aliPattern, async (ctx) => {
   const receivedMessage = ctx.message!;
   const newLink = aliTransformer(ctx.match as RegExpMatchArray);
+  const linkButton = new InlineKeyboard().url("Ver no AliExpress", newLink);
   return await ctx.reply(`Use o [link do PromoSup](${newLink})\\!`, {
     reply_to_message_id: receivedMessage.message_id,
     parse_mode: "MarkdownV2",
+    reply_markup: linkButton,
   });
 });
