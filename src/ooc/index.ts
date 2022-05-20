@@ -1,3 +1,4 @@
+import { ChatFromGetChat } from "@grammyjs/types";
 import { Composer, InputFile } from "grammy";
 import { OocContext } from "../config";
 import { ARCHIVE_CHANNEL_ID, BOT_USERNAME } from "../config/environment";
@@ -9,10 +10,27 @@ export const ooc = new Composer<OocContext>();
 
 const STEALTH_ACTION = "stealth";
 
+const whitelistedGroups = [-1001699419971];
+
+async function removeFromGroup(chatInfo: ChatFromGetChat, ctx: OocContext) {
+  if (whitelistedGroups.includes(chatInfo.id)) {
+    console.log(`Keep in group`);
+  } else {
+    try {
+      console.log(`Remove from group`);
+      await ctx.reply("This group is not authorized to use this bot. Bye :)");
+      await ctx.api.leaveChat(chatInfo.id);
+    } catch {
+      console.log(`Unable to leave group. Skipping…`);
+    }
+  }
+}
+
 const botUsername = BOT_USERNAME.toLowerCase();
 ooc.on("message:text", async (ctx, next) => {
   const chatInfo = await ctx.getChat();
   console.log(chatInfo);
+  // await removeFromGroup(chatInfo, ctx);
   const receivedMessage = ctx.update.message;
   const isPureMention = receivedMessage.text
     .toLowerCase()
