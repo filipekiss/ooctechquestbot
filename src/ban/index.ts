@@ -12,9 +12,10 @@ const banReasons = [
   "falar mal de Naruto",
   "seguir a Juzão no instagram",
   "chorar no banheiro da empresa",
+  "fazer trocadalho do carilho",
 ];
 
-ban.command(["ban"], async (context: OocContext) => {
+ban.command(["ban", "warn"], async (context: OocContext) => {
   const receivedMessage = context.update.message;
   const banningMessage = receivedMessage?.reply_to_message;
   if (banningMessage) {
