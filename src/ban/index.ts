@@ -13,6 +13,7 @@ const banReasons = [
   "seguir a Juzão no instagram",
   "chorar no banheiro da empresa",
   "fazer trocadalho do carilho",
+  "defender o plano de governo do Ciro Games",
 ];
 
 ban.command(["ban", "warn"], async (context: OocContext) => {
