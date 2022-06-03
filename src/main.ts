@@ -15,6 +15,7 @@ import { salpicao } from "./salpicao";
 import { banModule } from "./ban";
 import { wow } from "./wow";
 import { referral } from "./referral";
+import { banReasonModule } from "./ban/reason";
 
 setup();
 console.log("Starting...");
@@ -112,6 +113,7 @@ addModuleToBot(reportModule);
 addModuleToBot(keyboardModule);
 addModuleToBot(repetidaModule);
 addModuleToBot(banModule);
+addModuleToBot(banReasonModule);
 bot.use(help(commandRegister));
 // these must come last
 bot.use(paolica);

@@ -1,30 +1,31 @@
 import { Composer } from "grammy";
-import { OocContext } from "../config";
 import { BotModule } from "../main";
+import { OocContext } from "../config";
+import { getBanReason } from "./reason";
 
 export const ban = new Composer<OocContext>();
-
-const banReasons = [
-  "amar demais",
-  "defender bilionários",
-  "pedir pack do pezinho",
-  "não gostar de One Piece",
-  "falar mal de Naruto",
-  "seguir a Juzão no instagram",
-  "chorar no banheiro da empresa",
-  "fazer trocadalho do carilho",
-  "defender o plano de governo do Ciro Games",
-];
 
 ban.command(["ban", "warn"], async (context: OocContext) => {
   const receivedMessage = context.update.message;
   const banningMessage = receivedMessage?.reply_to_message;
   if (banningMessage) {
-    const banReason = banReasons[Math.floor(Math.random() * banReasons.length)];
+    const query = context.match as string;
+    const randomReason = (await getBanReason()).random();
+    let banReason = randomReason;
+    if (query) {
+      const allReasons = (await getBanReason()).all();
+      const foundReason = allReasons.find((reason) => {
+        return reason.toLowerCase().indexOf(query) > -1;
+      });
+      if (foundReason) {
+        banReason = foundReason;
+      }
+    }
     const bannedPerson = banningMessage.from?.first_name;
     await context.reply(`${bannedPerson} foi banido por ${banReason}`, {
       reply_to_message_id: banningMessage.message_id,
     });
+    return;
   }
 });
 
