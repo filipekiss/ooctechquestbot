@@ -23,7 +23,7 @@ export async function getBanReason() {
 const banDB = new Keyv(`sqlite://${DB_FOLDER}/ban.sqlite`);
 
 function makeDbKey(phrase: string) {
-  return phrase.replace(/[\s]/gi, "_");
+  return phrase.replace(/[\s]/gi, "_").toLowerCase();
 }
 
 async function checkExistingReason(reasonKey: string) {
