@@ -14,11 +14,14 @@ ban.command(["ban", "warn"], async (context: OocContext) => {
     let banReason = randomReason;
     if (query) {
       const allReasons = (await getBanReason()).all();
-      const foundReason = allReasons.find((reason) => {
+      const foundReason = allReasons.filter((reason) => {
         return reason.toLowerCase().indexOf(query) > -1;
       });
       if (foundReason) {
-        banReason = foundReason;
+        const random = [...foundReason][
+          Math.floor(Math.random() * foundReason.length)
+        ];
+        banReason = random;
       }
     }
     const bannedPerson = banningMessage.from?.first_name;
