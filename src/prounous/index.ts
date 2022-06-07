@@ -34,7 +34,13 @@ const pronounsKeyboard = new Keyboard()
   .row()
   .text(PRONOUNS_TRIGGERS[PRONOUNS.THEY]);
 
+const isGroupChat = (chatId: string) => chatId.startsWith("-");
+
 pronouns.command(["pronome", "pronomes"], async (ctx, next) => {
+  if (isGroupChat(String(ctx.chat.id))) {
+    await next();
+    return;
+  }
   const receivedMessage = ctx.message!;
   const botReply = await ctx.reply("Como você prefere ser chamado?", {
     reply_to_message_id: receivedMessage.message_id,
@@ -96,5 +102,6 @@ export const pronounModule: BotModule = {
   composer: pronouns,
   command: "pronome",
   alias: ["pronomes"],
-  shortDescription: "Escolha seus pronomes. Personaliza alguns comandos do bot",
+  shortDescription:
+    "Escolha seus pronomes. Personaliza alguns comandos do bot. Só funciona em chat privado",
 };
