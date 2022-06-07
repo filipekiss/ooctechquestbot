@@ -21,12 +21,6 @@ const PRONOUNS_TRIGGERS = {
   [PRONOUNS.THEY]: `${BOT_MESSAGE_TRACKER}Elu/Delu`,
 };
 
-const PRONOUNS_VALUES = {
-  [`${BOT_MESSAGE_TRACKER}Ele/Dele`]: [PRONOUNS.HE],
-  [`${BOT_MESSAGE_TRACKER}Ela/Dela`]: [PRONOUNS.SHE],
-  [`${BOT_MESSAGE_TRACKER}Elu/Delu`]: [PRONOUNS.THEY],
-};
-
 const pronounsKeyboard = new Keyboard()
   .text(PRONOUNS_TRIGGERS[PRONOUNS.SHE])
   .row()
@@ -82,6 +76,9 @@ function makePronounTrigger(pronoun: PRONOUNS) {
       ].replace(BOT_MESSAGE_TRACKER, "")}`,
       {
         reply_to_message_id: ctx.message.message_id,
+        reply_markup: {
+          remove_keyboard: true,
+        },
       }
     );
     await next();
