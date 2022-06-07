@@ -3,7 +3,7 @@ import { existsSync as fileExists } from "fs";
 import { resolve } from "path";
 
 export const APP_FOLDER = resolve(__dirname, "../../");
-export const DB_FOLDER = resolve(APP_FOLDER, './db');
+export const DB_FOLDER = resolve(APP_FOLDER, "./db");
 
 console.log(`APP_FOLDER ${APP_FOLDER}`);
 console.log(`DB_FOLDER ${DB_FOLDER}`);
@@ -30,3 +30,5 @@ export const DEFAULT_AUDIO_FOLDER = resolve(APP_FOLDER, "./audio");
 
 export const CUSTOM_ASSETS_FOLDER: string =
   process.env.CUSTOM_ASSETS_FOLDER ?? "/assets";
+
+export const BOT_MESSAGE_TRACKER = "‎";

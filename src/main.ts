@@ -16,6 +16,7 @@ import { banModule } from "./ban";
 import { wow } from "./wow";
 import { referral } from "./referral";
 import { banReasonModule } from "./ban/reason";
+import { pronounModule } from "./prounous";
 
 setup();
 console.log("Starting...");
@@ -111,6 +112,7 @@ addModuleToBot(nftModule);
 addModuleToBot(revoltaModule);
 addModuleToBot(reportModule);
 addModuleToBot(keyboardModule);
+addModuleToBot(pronounModule);
 addModuleToBot(repetidaModule);
 addModuleToBot(banModule);
 addModuleToBot(banReasonModule);

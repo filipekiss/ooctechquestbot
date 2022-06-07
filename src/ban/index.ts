@@ -2,8 +2,18 @@ import { Composer } from "grammy";
 import { BotModule } from "../main";
 import { OocContext } from "../config";
 import { getBanReason } from "./reason";
+import { getUserPronouns, PRONOUNS } from "../prounous";
 
 export const ban = new Composer<OocContext>();
+
+const banMessageFormat = {
+  [PRONOUNS.HE]: (person: string, reason: string) =>
+    `${person} foi banido por ${reason}`,
+  [PRONOUNS.SHE]: (person: string, reason: string) =>
+    `${person} foi banida por ${reason}`,
+  [PRONOUNS.THEY]: (person: string, reason: string) =>
+    `${person} foi banide por ${reason}`,
+};
 
 ban.command(["ban", "warn"], async (context: OocContext) => {
   const receivedMessage = context.update.message;
@@ -17,19 +27,34 @@ ban.command(["ban", "warn"], async (context: OocContext) => {
       const foundReason = allReasons.filter((reason) => {
         return reason.toLowerCase().indexOf(query) > -1;
       });
-      if (foundReason) {
+      if (foundReason.length > 0) {
         const random = [...foundReason][
           Math.floor(Math.random() * foundReason.length)
         ];
         banReason = random;
       }
     }
-    const bannedPerson = banningMessage.from?.first_name;
-    await context.reply(`${bannedPerson} foi banido por ${banReason}`, {
+    const bannedPerson = banningMessage.from;
+    if (!bannedPerson) {
+      return;
+    }
+    const bannedPersonName = bannedPerson.first_name;
+    const bannedPersonPronoun = await getUserPronouns(bannedPerson);
+    console.log(bannedPersonPronoun);
+    const bannedMessageFormat =
+      banMessageFormat[bannedPersonPronoun as unknown as PRONOUNS] ||
+      banMessageFormat[PRONOUNS.THEY];
+    await context.reply(bannedMessageFormat(bannedPersonName, banReason), {
       reply_to_message_id: banningMessage.message_id,
     });
     return;
   }
+});
+
+ban.command("banlist", async (ctx, next) => {
+  const allReasons = (await getBanReason()).all();
+  ctx.reply(`- ${allReasons.join("\n- ")}`);
+  await next();
 });
 
 export const banModule: BotModule = {
