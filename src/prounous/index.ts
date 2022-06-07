@@ -31,11 +31,14 @@ const pronounsKeyboard = new Keyboard()
 const isGroupChat = (chatId: string) => chatId.startsWith("-");
 
 pronouns.command(["pronome", "pronomes"], async (ctx, next) => {
+  const receivedMessage = ctx.message!;
   if (isGroupChat(String(ctx.chat.id))) {
+    await ctx.reply("Esse comando só funciona em chats privados.", {
+      reply_to_message_id: receivedMessage.message_id,
+    });
     await next();
     return;
   }
-  const receivedMessage = ctx.message!;
   const botReply = await ctx.reply("Como você prefere ser chamado?", {
     reply_to_message_id: receivedMessage.message_id,
     reply_markup: {
