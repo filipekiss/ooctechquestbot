@@ -33,7 +33,8 @@ const referralSites: ReferralConfig[] = [
     store: "aliexpress",
     buttonText: "Ver no AliExpress",
 
-    pattern: /(https:\/\/(?:www.)?aliexpress.com\/item\/.*.html)/gm,
+    pattern:
+      /(https:\/\/(?:[a-z0-9].*\.)?aliexpress.com\/item\/.*.html)(?:.*)/gm,
 
     transform: (matches) => {
       const [, productUrl] = matches;
