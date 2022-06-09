@@ -128,8 +128,19 @@ bot.use(acende);
 bot.use(ooc);
 
 bot.start({
-  onStart: (bot) => {
+  onStart: async (me) => {
     console.log(`Started...`);
-    console.log({ bot });
+    console.log({ me });
+
+    await bot.api.setMyCommands(
+      [...commandRegister.values()]
+        .filter((command) => command.command && command.shortDescription)
+        .map((command) => {
+          return {
+            command: command.command as string,
+            description: command.shortDescription as string,
+          };
+        })
+    );
   },
 });
