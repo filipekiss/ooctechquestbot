@@ -1,3 +1,4 @@
+import got from "got/dist/source";
 import { Composer, InlineKeyboard } from "grammy";
 import { OocContext } from "../config";
 
@@ -5,7 +6,9 @@ type ReferralConfig = {
   store: string;
   buttonText: string;
   pattern: RegExp;
-  transform: (matches: RegExpMatchArray) => string;
+  transform: (
+    matches: RegExpMatchArray
+  ) => string | Promise<string | null> | null;
 };
 const referralSites: ReferralConfig[] = [
   {
@@ -44,6 +47,25 @@ const referralSites: ReferralConfig[] = [
     },
   },
   {
+    buttonText: "Ver no AliExpress",
+    store: "alishort",
+    pattern: /(https:\/\/(?:[a-z0-9].*\.)?aliexpress.com\/.*)(?:\?.*)?/gm,
+    transform: async (matches) => {
+      const [shortUrl] = matches;
+      const { redirectUrls } = await got.get(shortUrl);
+      const aliX = referralSites.find(
+        (config) => config.store === "aliexpress"
+      );
+      const [productUrl] = redirectUrls;
+      const expandedMatches = aliX!.pattern.exec(productUrl);
+      if (expandedMatches) {
+        const newUrl = aliX?.transform(expandedMatches);
+        return newUrl ? newUrl : null;
+      }
+      return null;
+    },
+  },
+  {
     store: "magazineluiza",
     buttonText: "Ver no Magazine",
 
@@ -69,13 +91,15 @@ referral.hears(
       await next();
       return;
     }
-    const newLink = store.transform(ctx.match as RegExpMatchArray);
-    const linkButton = new InlineKeyboard().url(store.buttonText, newLink);
-    await ctx.reply(`Use o [link do PromoSup](${newLink})\\!`, {
-      reply_to_message_id: receivedMessage.message_id,
-      parse_mode: "MarkdownV2",
-      reply_markup: linkButton,
-    });
+    const newLink = await store.transform(ctx.match as RegExpMatchArray);
+    if (newLink) {
+      const linkButton = new InlineKeyboard().url(store.buttonText, newLink);
+      await ctx.reply(`Use o [link do PromoSup](${newLink})\\!`, {
+        reply_to_message_id: receivedMessage.message_id,
+        parse_mode: "MarkdownV2",
+        reply_markup: linkButton,
+      });
+    }
     await next();
     return;
   }
