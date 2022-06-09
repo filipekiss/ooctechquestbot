@@ -1,11 +1,10 @@
 import { HydrateFlavor } from "@grammyjs/hydrate";
 import { Context } from "grammy";
 import {
-    ARCHIVE_CHANNEL_ID,
-    BOT_TOKEN,
-    BOT_USERNAME,
-    CUSTOM_ASSETS_FOLDER,
-    DEFAULT_ASSETS_FOLDER
+  ARCHIVE_CHANNEL_ID,
+  BOT_TOKEN,
+  BOT_USERNAME,
+  DEFAULT_ASSETS_FOLDER,
 } from "./environment";
 
 function abortIfEmpty(key: string, value: unknown) {
@@ -22,5 +21,4 @@ export function setup() {
   abortIfEmpty(`BOT_USERNAME`, BOT_USERNAME);
   abortIfEmpty(`ARCHIVE_CHANNEL_ID`, ARCHIVE_CHANNEL_ID);
   abortIfEmpty(`DEFAULT_ASSETS_FOLDER`, DEFAULT_ASSETS_FOLDER);
-  abortIfEmpty(`CUSTOM_ASSETS_FOLDER`, CUSTOM_ASSETS_FOLDER);
 }

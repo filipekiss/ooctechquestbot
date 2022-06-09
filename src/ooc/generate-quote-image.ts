@@ -1,9 +1,6 @@
 import * as fs from "fs";
 import { basename, resolve } from "path";
-import {
-  CUSTOM_ASSETS_FOLDER,
-  DEFAULT_ASSETS_FOLDER,
-} from "../config/environment";
+import { DEFAULT_ASSETS_FOLDER } from "../config/environment";
 import {
   createCanvasFromImage,
   getTextSize,
@@ -11,7 +8,8 @@ import {
 } from "../libs/image";
 
 const primaryTextColor = "#FFFFFF";
-const secondaryTextColor = "#9D9B89";
+
+const BACKGROUND_IMAGES_FOLDER = resolve(DEFAULT_ASSETS_FOLDER, "./quotes");
 
 interface QuoteDetails {
   text: string;
@@ -46,36 +44,29 @@ export function listAvailableTemplates(folders: string[]) {
 
 function getQuoteTemplate(query?: string) {
   let templateFiles = fs
-    .readdirSync(DEFAULT_ASSETS_FOLDER)
-    .map(resolvePathTo(DEFAULT_ASSETS_FOLDER));
-  try {
-    const filesInFolder = fs
-      .readdirSync(CUSTOM_ASSETS_FOLDER)
-      .map(resolvePathTo(CUSTOM_ASSETS_FOLDER));
-    templateFiles = [...templateFiles, ...filesInFolder];
-  } finally {
-    console.log({ templateFiles });
+    .readdirSync(BACKGROUND_IMAGES_FOLDER)
+    .map(resolvePathTo(BACKGROUND_IMAGES_FOLDER));
+  console.log({ templateFiles });
 
-    if (query) {
-      let eligibleFiles = templateFiles.filter((template) =>
-        template.includes(query)
-      );
-      console.log({ eligibleFiles });
-      if (eligibleFiles.length === 0) {
-        eligibleFiles = templateFiles;
-      }
-      const quoteTemplate =
-        eligibleFiles[Math.floor(Math.random() * eligibleFiles.length)];
-      console.log(`Random image file selected: ${quoteTemplate}`);
-      return quoteTemplate;
+  if (query) {
+    let eligibleFiles = templateFiles.filter((template) =>
+      template.includes(query)
+    );
+    console.log({ eligibleFiles });
+    if (eligibleFiles.length === 0) {
+      eligibleFiles = templateFiles;
     }
-
     const quoteTemplate =
-      templateFiles[Math.floor(Math.random() * templateFiles.length)];
+      eligibleFiles[Math.floor(Math.random() * eligibleFiles.length)];
     console.log(`Random image file selected: ${quoteTemplate}`);
-
     return quoteTemplate;
   }
+
+  const quoteTemplate =
+    templateFiles[Math.floor(Math.random() * templateFiles.length)];
+  console.log(`Random image file selected: ${quoteTemplate}`);
+
+  return quoteTemplate;
 }
 
 export const generateQuoteImage = async (quote: QuoteDetails) => {

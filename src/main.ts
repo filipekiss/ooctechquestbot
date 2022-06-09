@@ -17,6 +17,7 @@ import { wow } from "./wow";
 import { referral } from "./referral";
 import { banReasonModule } from "./ban/reason";
 import { pronounModule } from "./prounous";
+import { deliriosModule } from "./delirio";
 
 setup();
 console.log("Starting...");
@@ -116,6 +117,7 @@ addModuleToBot(pronounModule);
 addModuleToBot(repetidaModule);
 addModuleToBot(banModule);
 addModuleToBot(banReasonModule);
+addModuleToBot(deliriosModule);
 bot.use(help(commandRegister));
 // these must come last
 bot.use(paolica);
