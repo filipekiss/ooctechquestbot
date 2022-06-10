@@ -18,6 +18,7 @@ import { referral } from "./referral";
 import { banReasonModule } from "./ban/reason";
 import { pronounModule } from "./prounous";
 import { deliriosModule } from "./delirio";
+import { simpleReply } from "./simple-reply";
 
 setup();
 console.log("Starting...");
@@ -118,6 +119,7 @@ addModuleToBot(repetidaModule);
 addModuleToBot(banModule);
 addModuleToBot(banReasonModule);
 addModuleToBot(deliriosModule);
+bot.use(simpleReply);
 bot.use(help(commandRegister));
 // these must come last
 bot.use(paolica);
