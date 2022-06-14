@@ -17,6 +17,7 @@
     "ts-node": "^10.2.1"
   },
   "dependencies": {
+    "@grammyjs/files": "^1.0.4",
     "@grammyjs/hydrate": "^1.0.3",
     "@keyv/sqlite": "^2.0.3",
     "canvas": "^2.8.0",

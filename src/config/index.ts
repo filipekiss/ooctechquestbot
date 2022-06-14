@@ -1,3 +1,4 @@
+import { FileFlavor } from "@grammyjs/files";
 import { HydrateFlavor } from "@grammyjs/hydrate";
 import { Context } from "grammy";
 import {
@@ -14,7 +15,7 @@ function abortIfEmpty(key: string, value: unknown) {
   console.log(`Using ${key}: ${value}`);
 }
 
-export type OocContext = HydrateFlavor<Context>;
+export type OocContext = HydrateFlavor<FileFlavor<Context>>;
 
 export function setup() {
   abortIfEmpty(`BOT_TOKEN`, BOT_TOKEN);

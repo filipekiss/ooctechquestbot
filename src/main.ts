@@ -1,5 +1,6 @@
 import { hydrate } from "@grammyjs/hydrate";
-import { Bot, Composer, InputFile } from "grammy";
+import { FileApiFlavor, hydrateFiles } from "@grammyjs/files";
+import { Api, Bot, Composer, InputFile } from "grammy";
 import { acende } from "./acende";
 import { badumtsModule } from "./badumts";
 import { OocContext, setup } from "./config";
@@ -19,6 +20,7 @@ import { banReasonModule } from "./ban/reason";
 import { pronounModule } from "./prounous";
 import { deliriosModule } from "./delirio";
 import { simpleReply } from "./simple-reply";
+import { lazer } from "./lazer";
 
 setup();
 console.log("Starting...");
@@ -41,7 +43,7 @@ const addToRegister =
   };
 const addToCommandRegister = addToRegister(commandRegister);
 
-const bot = new Bot<OocContext>(BOT_TOKEN);
+const bot = new Bot<OocContext, FileApiFlavor<Api>>(BOT_TOKEN);
 const addModuleToBot = (module: BotModule) => {
   if (module.shortDescription && module.command) {
     addToCommandRegister(module.command, module);
@@ -119,6 +121,7 @@ addModuleToBot(repetidaModule);
 addModuleToBot(banModule);
 addModuleToBot(banReasonModule);
 addModuleToBot(deliriosModule);
+bot.use(lazer);
 bot.use(simpleReply);
 bot.use(help(commandRegister));
 // these must come last
@@ -134,6 +137,7 @@ bot.start({
     console.log(`Started...`);
     console.log({ me });
 
+    bot.api.config.use(hydrateFiles(bot.token));
     await bot.api.setMyCommands(
       [...commandRegister.values()]
         .filter((command) => command.command && command.shortDescription)
