@@ -25,7 +25,11 @@ export const ARCHIVE_CHANNEL_ID: string = process.env.ARCHIVE_CHANNEL_ID ?? "";
 
 export const BOT_USERNAME: string = process.env.BOT_USERNAME ?? "";
 
-export const DEFAULT_ASSETS_FOLDER = resolve(APP_FOLDER, "./assets");
+export const DEFAULT_ASSETS_FOLDER =
+  process.env.NODE_ENV === "production"
+    ? resolve(APP_FOLDER, "./build/assets")
+    : resolve(APP_FOLDER, "./assets");
+
 export const DEFAULT_AUDIO_FOLDER = resolve(APP_FOLDER, "./audio");
 
 export const BOT_MESSAGE_TRACKER = "‎";
