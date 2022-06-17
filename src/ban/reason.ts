@@ -63,6 +63,7 @@ const banReason = new Composer<OocContext>();
 banReason.command("banreason", async (ctx: OocContext, next) => {
   const reason = ctx.match as string;
   if (!reason || reason === "list") {
+    ctx.replyWithChatAction("typing");
     const reasonList = (await getBanReason()).all();
     ctx.reply(reasonList.join("\n"), {
       ...replyToSender(ctx),
