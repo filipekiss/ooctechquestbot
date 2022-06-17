@@ -1,5 +1,6 @@
 import { Composer, InputFile } from "grammy";
 import { OocContext } from "../config";
+import { sendDelirio } from "../delirio";
 import { generateLazerImage } from "./generate-image";
 
 export const lazer = new Composer<OocContext>();
@@ -12,6 +13,10 @@ lazer.command("lazer", async (ctx, next) => {
     return;
   }
   ctx.replyWithChatAction("upload_photo");
+  if (receivedMessage.from?.id === replyToMessage.from?.id) {
+    await sendDelirio(ctx, next);
+    return;
+  }
   const senderPhotos = await ctx.api.getUserProfilePhotos(
     receivedMessage.from?.id as number
   );

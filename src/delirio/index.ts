@@ -1,11 +1,11 @@
-import { Composer, InputFile } from "grammy";
+import { Composer, InputFile, NextFunction } from "grammy";
 import { OocContext } from "../config";
 import { DEFAULT_ASSETS_FOLDER } from "../config/environment";
 import { BotModule } from "../main";
 
 export const delirio = new Composer<OocContext>();
 
-delirio.command(["delirio", "delirios"], async (context: OocContext) => {
+export const sendDelirio = async (context: OocContext, next: NextFunction) => {
   const receivedMessage = context.update.message;
   await context.replyWithPhoto(
     new InputFile(`${DEFAULT_ASSETS_FOLDER}/delirios.jpg`),
@@ -22,7 +22,10 @@ delirio.command(["delirio", "delirios"], async (context: OocContext) => {
       console.error("Unable to delete message. Skipping...");
     }
   }
-});
+  await next();
+};
+
+delirio.command(["delirio", "delirios"], sendDelirio);
 
 export const deliriosModule: BotModule = {
   command: "delirio",
