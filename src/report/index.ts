@@ -5,6 +5,7 @@ import Keyv from "keyv";
 import { OocContext } from "../config";
 import { DB_FOLDER } from "../config/environment";
 import { BotModule } from "../main";
+import { replyToReply, replyToSender } from "../utils/message";
 import { generateStreakImage } from "./generate-streak-image";
 import { isReply } from "./is-message-reply.filter";
 
@@ -58,7 +59,7 @@ async function updateStreakWithLargest(
 async function replyAlreadyReported(ctx: OocContext) {
   const receivedMessage = ctx.message!;
   const botReply = await ctx.reply("Essa mensagem já foi reportada.", {
-    reply_to_message_id: receivedMessage.message_id,
+    ...replyToSender(ctx),
   });
   setTimeout(async () => {
     try {
@@ -85,7 +86,7 @@ async function sendReport(ctx: OocContext, isReport?: boolean) {
     ),
     {
       reply_to_message_id: isReport
-        ? ctx.message!.reply_to_message!.message_id
+        ? replyToReply(ctx).reply_to_message_id
         : undefined,
     }
   );

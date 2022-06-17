@@ -3,6 +3,7 @@ import { BotModule } from "../main";
 import { OocContext } from "../config";
 import { getBanReason } from "./reason";
 import { getUserPronouns, PRONOUNS } from "../prounous";
+import { replyToReply } from "../utils/message";
 
 export const ban = new Composer<OocContext>();
 
@@ -45,16 +46,10 @@ ban.command(["ban", "warn"], async (context: OocContext) => {
       banMessageFormat[bannedPersonPronoun as unknown as PRONOUNS] ||
       banMessageFormat[PRONOUNS.THEY];
     await context.reply(bannedMessageFormat(bannedPersonName, banReason), {
-      reply_to_message_id: banningMessage.message_id,
+      ...replyToReply(context),
     });
     return;
   }
-});
-
-ban.command("banlist", async (ctx, next) => {
-  const allReasons = (await getBanReason()).all();
-  ctx.reply(`- ${allReasons.join("\n- ")}`);
-  await next();
 });
 
 export const banModule: BotModule = {

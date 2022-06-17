@@ -3,6 +3,7 @@ import got from "got";
 import { Composer } from "grammy";
 import { OocContext } from "../config";
 import { mdEscape } from "../main";
+import { replyToReplyOrToSender } from "../utils/message";
 
 const wowApi =
   "https://owen-wilson-wow-api.herokuapp.com/wows/random?results=1";
@@ -26,11 +27,8 @@ wow.hears(wowPattern, async (ctx) => {
   >();
   const sendSomething = Math.floor(Math.random() * 10);
   if (sendSomething > 1) return;
-  const receivedMessage = ctx.message as Message;
   const replyMessageOptions = {
-    reply_to_message_id:
-      receivedMessage?.reply_to_message?.message_id ??
-      receivedMessage.message_id,
+    ...replyToReplyOrToSender(ctx),
     caption: mdEscape(
       `_${wow.full_line}_ - *${wow.character}*, ${wow.movie}, ${wow.year}`
     ),

@@ -1,6 +1,7 @@
 import { Composer, InputFile } from "grammy";
 import { OocContext } from "../config";
 import { sendDelirio } from "../delirio";
+import { replyToReply } from "../utils/message";
 import { generateLazerImage } from "./generate-image";
 
 export const lazer = new Composer<OocContext>();
@@ -34,6 +35,6 @@ lazer.command("lazer", async (ctx, next) => {
   const receiverPhotoFile = await receiverPhotoImage.download();
   const image = await generateLazerImage(senderPhotoFile, receiverPhotoFile);
   ctx.replyWithPhoto(new InputFile(image), {
-    reply_to_message_id: replyToMessage.message_id,
+    ...replyToReply(ctx),
   });
 });

@@ -4,6 +4,7 @@ import { DB_FOLDER } from "../config/environment";
 import Keyv from "keyv";
 import { ReplyMessage } from "@grammyjs/types";
 import { MessageX } from "@grammyjs/hydrate/out/data/message";
+import { replyToSender } from "../utils/message";
 
 const NFT_Meanings = [
   "Não Faço Trabalho",
@@ -36,10 +37,9 @@ async function getNftMeaning() {
 
 export const nft = new Composer<OocContext>();
 nft.hears(/nft/i, async (ctx) => {
-  const receivedMessage = ctx.message!;
   const nftMeaning = (await getNftMeaning()).random();
   return await ctx.reply(`NFT significa "${nftMeaning}"`, {
-    reply_to_message_id: receivedMessage.message_id,
+    ...replyToSender(ctx),
   });
 });
 

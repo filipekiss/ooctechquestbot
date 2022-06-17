@@ -4,6 +4,7 @@ import Keyv from "keyv";
 import { OocContext } from "../config";
 import { BOT_MESSAGE_TRACKER, DB_FOLDER } from "../config/environment";
 import { BotModule } from "../main";
+import { replyToSender } from "../utils/message";
 
 export const pronouns = new Composer<OocContext>();
 
@@ -31,16 +32,15 @@ const pronounsKeyboard = new Keyboard()
 const isGroupChat = (chatId: string) => chatId.startsWith("-");
 
 pronouns.command(["pronome", "pronomes"], async (ctx, next) => {
-  const receivedMessage = ctx.message!;
   if (isGroupChat(String(ctx.chat.id))) {
     await ctx.reply("Esse comando só funciona em chats privados.", {
-      reply_to_message_id: receivedMessage.message_id,
+      ...replyToSender(ctx),
     });
     await next();
     return;
   }
-  const botReply = await ctx.reply("Como você prefere ser chamado?", {
-    reply_to_message_id: receivedMessage.message_id,
+  await ctx.reply("Como você prefere ser chamado?", {
+    ...replyToSender(ctx),
     reply_markup: {
       one_time_keyboard: true,
       keyboard: pronounsKeyboard.build(),

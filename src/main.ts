@@ -21,6 +21,7 @@ import { pronounModule } from "./prounous";
 import { deliriosModule } from "./delirio";
 import { simpleReply } from "./simple-reply";
 import { lazer } from "./lazer";
+import { replyToSender } from "./utils/message";
 
 setup();
 console.log("Starting...");
@@ -63,7 +64,7 @@ const help = (commandsRegister: any) => {
     if ((commandHelp as string).toLowerCase() === "luciano") {
       const image = new InputFile("./src/ajuda-luciano.png");
       return ctx.replyWithPhoto(image, {
-        reply_to_message_id: receivedMessage.message_id,
+        ...replyToSender(ctx),
       });
     }
     const lines = [];
@@ -88,7 +89,7 @@ const help = (commandsRegister: any) => {
         }
       });
       return ctx.reply(mdEscape(lines.join("\n")), {
-        reply_to_message_id: receivedMessage.message_id,
+        ...replyToSender(ctx),
         parse_mode: "MarkdownV2",
       });
     }
@@ -103,7 +104,7 @@ const help = (commandsRegister: any) => {
       lines.push(`Não encontrei nenhuma ajuda pro comando ${commandHelp}`);
     }
     ctx.reply(mdEscape(lines.join("\n")), {
-      reply_to_message_id: receivedMessage.message_id,
+      ...replyToSender(ctx),
       parse_mode: "MarkdownV2",
     });
   });

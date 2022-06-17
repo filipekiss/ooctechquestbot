@@ -1,6 +1,7 @@
 import { Composer } from "grammy";
 import { OocContext } from "../config";
 import { BotModule } from "../main";
+import { replyToReplyOrToSender } from "../utils/message";
 
 export const revolta = new Composer<OocContext>();
 
@@ -9,9 +10,7 @@ const replyRevolta = revolta.command(
   async (context: OocContext) => {
     const receivedMessage = context.update.message;
     await context.reply("(╯°□°）╯︵ ┻━┻", {
-      reply_to_message_id:
-        receivedMessage?.reply_to_message?.message_id ??
-        context.message!.message_id,
+      ...replyToReplyOrToSender(context),
     });
     if (receivedMessage?.reply_to_message) {
       try {

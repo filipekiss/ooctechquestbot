@@ -1,6 +1,7 @@
 import got from "got/dist/source";
 import { Composer, InlineKeyboard } from "grammy";
 import { OocContext } from "../config";
+import { replyToSender } from "../utils/message";
 
 type ReferralConfig = {
   store: string;
@@ -95,7 +96,7 @@ referral.hears(
     if (newLink) {
       const linkButton = new InlineKeyboard().url(store.buttonText, newLink);
       await ctx.reply(`Use o [link do PromoSup](${newLink})\\!`, {
-        reply_to_message_id: receivedMessage.message_id,
+        ...replyToSender(ctx),
         parse_mode: "MarkdownV2",
         reply_markup: linkButton,
       });
