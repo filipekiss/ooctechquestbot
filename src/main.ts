@@ -22,6 +22,7 @@ import { deliriosModule } from "./delirio";
 import { simpleReply } from "./simple-reply";
 import { lazer } from "./lazer";
 import { replyToSender } from "./utils/message";
+import { quoteModule } from "./quote";
 
 setup();
 console.log("Starting...");
@@ -53,7 +54,7 @@ const addModuleToBot = (module: BotModule) => {
 };
 
 export function mdEscape(text: string): string {
-  return text.replace(/[[\]()~`>#+\-=|{}.!\\]/g, "\\$&");
+  return text.replace(/[[\]()~>#+\-=|{}.!\\]/g, "\\$&");
 }
 
 const help = (commandsRegister: any) => {
@@ -122,9 +123,11 @@ addModuleToBot(repetidaModule);
 addModuleToBot(banModule);
 addModuleToBot(banReasonModule);
 addModuleToBot(deliriosModule);
+addModuleToBot(quoteModule);
 bot.use(lazer);
 bot.use(simpleReply);
 bot.use(help(commandRegister));
+
 // these must come last
 bot.use(paolica);
 bot.use(salpicao);
