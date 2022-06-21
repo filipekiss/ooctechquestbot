@@ -15,11 +15,29 @@ const referralSites: ReferralConfig[] = [
   {
     store: "amazon",
     buttonText: "Ver na Amazon",
-    pattern: /(https:\/\/(?:www.)?amazon.com.br)\/(?:[^\/]+\/)?dp\/([^\/?]+)/gm,
+    pattern:
+      /(https:\/\/(?:www.)?amazon.com.br)\/(?:[^\/]+\/)?(?:[^\/]+)\/([^\/?]+)/gm,
     transform: (matches) => {
       const [, amazonUrl, id] = matches;
       const affiliate = "?tag=mq08-20";
       return `${amazonUrl}/dp/${id}${affiliate}`;
+    },
+  },
+  {
+    buttonText: "Ver na Amazon",
+    store: "amznto",
+    pattern: /(https:\/\/(?:[a-z0-9].*\.)?amzn.to\/.*)(?:\?.*)?/gm,
+    transform: async (matches) => {
+      const [shortUrl] = matches;
+      const { redirectUrls } = await got.get(shortUrl);
+      const amazon = referralSites.find((config) => config.store === "amazon");
+      const [productUrl] = redirectUrls;
+      const expandedMatches = amazon?.pattern.exec(productUrl);
+      if (expandedMatches) {
+        const newUrl = amazon?.transform(expandedMatches);
+        return newUrl ? newUrl : null;
+      }
+      return null;
     },
   },
   {
@@ -58,7 +76,7 @@ const referralSites: ReferralConfig[] = [
         (config) => config.store === "aliexpress"
       );
       const [productUrl] = redirectUrls;
-      const expandedMatches = aliX!.pattern.exec(productUrl);
+      const expandedMatches = aliX?.pattern.exec(productUrl);
       if (expandedMatches) {
         const newUrl = aliX?.transform(expandedMatches);
         return newUrl ? newUrl : null;
