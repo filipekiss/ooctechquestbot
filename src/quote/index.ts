@@ -130,6 +130,25 @@ quote.command("quote", async (ctx, next) => {
       await next();
       return;
     }
+    case "list": {
+      ctx.replyWithChatAction("typing");
+      const quotesList = (await getQuoteKeys()).all();
+      console.log({ quotesList });
+      if (quotesList.length === 0) {
+        ctx.reply("Não tenho nenhuma quote registrada", {
+          ...replyToSender(ctx),
+        });
+      } else {
+        ctx.reply(
+          quotesList.map((quote) => "`/quote " + quote + "`").join("\n"),
+          {
+            ...replyToSender(ctx),
+          }
+        );
+      }
+      await next();
+      return;
+    }
 
     default: {
       // Check if the key is already being used
