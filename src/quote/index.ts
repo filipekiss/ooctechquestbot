@@ -1,3 +1,4 @@
+import { Message } from "@grammyjs/types";
 import { Composer } from "grammy";
 import Keyv from "keyv";
 import { OocContext } from "../config";
@@ -8,6 +9,32 @@ import { replyToSender } from "../utils/message";
 const quote = new Composer<OocContext>();
 
 const quoteDB = new Keyv(`sqlite://${DB_FOLDER}/quote.sqlite`);
+
+export const QUOTE_SCHEMA = {
+  QUOTES_KEYS: "quotes_keys",
+};
+export async function getQuoteKeys() {
+  const quotesKeys = (await quoteDB.get(QUOTE_SCHEMA.QUOTES_KEYS)) as string;
+  const allQuoteKeys = quotesKeys ? quotesKeys.split("\n") : [];
+  return {
+    all: () => [...allQuoteKeys],
+  };
+}
+
+async function addQuote(quoteKey: string, messageToQuote: Message) {
+  const allQuoteKeys = (await getQuoteKeys()).all();
+  const newQuoteKeys = [...allQuoteKeys, quoteKey];
+
+  await quoteDB.set(messageToQuote.message_id.toString(), {
+    ...messageToQuote,
+    ooc_quote_key: quoteKey,
+  });
+  await quoteDB.set(quoteKey, {
+    ...messageToQuote,
+    ooc_quote_key: quoteKey,
+  });
+  await quoteDB.set(QUOTE_SCHEMA.QUOTES_KEYS, newQuoteKeys.join("\n"));
+}
 
 async function replyAlreadyQuoted(ctx: OocContext, quoteKey: string) {
   const receivedMessage = ctx.message!;
@@ -90,14 +117,7 @@ quote.command("quote", async (ctx, next) => {
         return;
       }
       // Add the quote to the database
-      await quoteDB.set(messageToQuote.message_id.toString(), {
-        ...messageToQuote,
-        ooc_quote_key: key,
-      });
-      await quoteDB.set(key, {
-        ...messageToQuote,
-        ooc_quote_key: key,
-      });
+      await addQuote(key, messageToQuote);
       ctx.reply(
         mdEscape(
           "Pronto! Basta enviar `/quote " + key + "` para citar essa mensagem"
