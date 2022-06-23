@@ -19,3 +19,9 @@ export const replyToReplyOrToSender = (context: OocContext) => {
       context.message!.message_id,
   };
 };
+
+export const sendAsMarkdown = (): { parse_mode: "MarkdownV2" } => {
+  return {
+    parse_mode: "MarkdownV2",
+  };
+};

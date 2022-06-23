@@ -4,7 +4,7 @@ import Keyv from "keyv";
 import { OocContext } from "../config";
 import { DB_FOLDER } from "../config/environment";
 import { BotModule, mdEscape } from "../main";
-import { replyToSender } from "../utils/message";
+import { replyToSender, sendAsMarkdown } from "../utils/message";
 
 const quote = new Composer<OocContext>();
 
@@ -140,9 +140,12 @@ quote.command("quote", async (ctx, next) => {
         });
       } else {
         ctx.reply(
-          quotesList.map((quote) => "`/quote " + quote + "`").join("\n"),
+          quotesList
+            .map((quote) => mdEscape("`/quote " + quote + "`"))
+            .join("\n"),
           {
             ...replyToSender(ctx),
+            ...sendAsMarkdown(),
           }
         );
       }
