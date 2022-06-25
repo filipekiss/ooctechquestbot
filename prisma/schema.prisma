@@ -50,12 +50,27 @@ model TelegramPrivateChat {
 }
 
 model TelegramUser {
-  id          Int       @id @default(autoincrement())
-  chats       BotChat[]
-  telegram_id Int       @unique
-  first_name  String?
-  last_name   String?
-  username    String?
-  created_at  DateTime  @default(now())
-  updated_at  DateTime  @updatedAt
+  id           Int       @id @default(autoincrement())
+  chats        BotChat[]
+  telegram_id  Int       @unique
+  first_name   String?
+  last_name    String?
+  username     String?
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @updatedAt
+  quotes       Quote[]   @relation("author")
+  added_quotes Quote[]   @relation("quoted_by")
+}
+
+model Quote {
+  id           Int          @id @default(autoincrement())
+  key          String       @unique
+  author       TelegramUser @relation("author", fields: [author_id], references: [id])
+  author_id    Int
+  quoted_by    TelegramUser @relation("quoted_by", fields: [quoted_by_id], references: [id])
+  quoted_by_id Int
+  message_id   Int          @unique
+  message      Json
+  chat_id      String
+  uses         Int          @default(0)
 }

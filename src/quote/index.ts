@@ -1,40 +1,17 @@
-import { Message } from "@grammyjs/types";
+import { User } from "@grammyjs/types";
 import { Composer } from "grammy";
-import Keyv from "keyv";
 import { OocContext } from "../config";
-import { DB_FOLDER } from "../config/environment";
+import {
+  createQuote,
+  getAllQuoteKeys,
+  getQuoteByKey,
+  getQuoteByMessageId,
+  incrementUsesCountById,
+} from "../data/quote";
 import { BotModule, mdEscape } from "../main";
 import { replyToSender, sendAsMarkdown } from "../utils/message";
 
 const quote = new Composer<OocContext>();
-
-const quoteDB = new Keyv(`sqlite://${DB_FOLDER}/quote.sqlite`);
-
-export const QUOTE_SCHEMA = {
-  QUOTES_KEYS: "quotes_keys",
-};
-export async function getQuoteKeys() {
-  const quotesKeys = (await quoteDB.get(QUOTE_SCHEMA.QUOTES_KEYS)) as string;
-  const allQuoteKeys = quotesKeys ? quotesKeys.split("\n") : [];
-  return {
-    all: () => [...allQuoteKeys],
-  };
-}
-
-async function addQuote(quoteKey: string, messageToQuote: Message) {
-  const allQuoteKeys = (await getQuoteKeys()).all();
-  const newQuoteKeys = [...allQuoteKeys, quoteKey];
-
-  await quoteDB.set(messageToQuote.message_id.toString(), {
-    ...messageToQuote,
-    ooc_quote_key: quoteKey,
-  });
-  await quoteDB.set(quoteKey, {
-    ...messageToQuote,
-    ooc_quote_key: quoteKey,
-  });
-  await quoteDB.set(QUOTE_SCHEMA.QUOTES_KEYS, newQuoteKeys.join("\n"));
-}
 
 async function replyAlreadyQuoted(ctx: OocContext, quoteKey: string) {
   const receivedMessage = ctx.message!;
@@ -99,16 +76,16 @@ quote.command("quote", async (ctx, next) => {
         return;
       }
       // this quote already exists
-      const existingQuoteMessage = await quoteDB.get(
-        messageToQuote.message_id.toString()
+      const existingQuoteMessage = await getQuoteByMessageId(
+        messageToQuote.message_id
       );
       if (existingQuoteMessage) {
-        replyAlreadyQuoted(ctx, existingQuoteMessage.ooc_quote_key as string);
+        replyAlreadyQuoted(ctx, existingQuoteMessage.key as string);
         await next();
         return;
       }
       // Check if the key is already being used
-      const existingQuote = await quoteDB.get(key);
+      const existingQuote = await getQuoteByKey(key);
       if (existingQuote) {
         ctx.reply("Já existe uma citação com essa chave", {
           ...replyToSender(ctx),
@@ -117,7 +94,12 @@ quote.command("quote", async (ctx, next) => {
         return;
       }
       // Add the quote to the database
-      await addQuote(key, messageToQuote);
+      await createQuote(
+        key,
+        messageToQuote,
+        messageToQuote.from as User,
+        ctx.from as User
+      );
       ctx.reply(
         mdEscape(
           "Pronto! Basta enviar `/quote " + key + "` para citar essa mensagem"
@@ -132,7 +114,7 @@ quote.command("quote", async (ctx, next) => {
     }
     case "list": {
       ctx.replyWithChatAction("typing");
-      const quotesList = (await getQuoteKeys()).all();
+      const quotesList = await getAllQuoteKeys();
       console.log({ quotesList });
       if (quotesList.length === 0) {
         ctx.reply("Não tenho nenhuma quote registrada", {
@@ -141,7 +123,7 @@ quote.command("quote", async (ctx, next) => {
       } else {
         ctx.reply(
           quotesList
-            .map((quote) => mdEscape("`/quote " + quote + "`"))
+            .map((quote) => mdEscape("`/quote " + quote.key + "`"))
             .join("\n"),
           {
             ...replyToSender(ctx),
@@ -155,7 +137,7 @@ quote.command("quote", async (ctx, next) => {
 
     default: {
       // Check if the key is already being used
-      const existingQuote = await quoteDB.get(actionOrKey);
+      const existingQuote = await getQuoteByKey(actionOrKey);
       if (!existingQuote) {
         ctx.reply("Não encontrei nenhuma citação relacionada", {
           ...replyToSender(ctx),
@@ -163,9 +145,10 @@ quote.command("quote", async (ctx, next) => {
         await next();
         return;
       }
+      await incrementUsesCountById(existingQuote.id);
       ctx.api.forwardMessage(
         ctx.chat.id,
-        existingQuote.chat.id,
+        existingQuote.chat_id,
         existingQuote.message_id
       );
       await next();
