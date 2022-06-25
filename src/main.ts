@@ -23,6 +23,7 @@ import { simpleReply } from "./simple-reply";
 import { lazer } from "./lazer";
 import { replyToSender } from "./utils/message";
 import { quoteModule } from "./quote";
+import { metadataMiddleware } from "./metadata";
 
 setup();
 console.log("Starting...");

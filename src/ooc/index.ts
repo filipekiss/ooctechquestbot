@@ -55,8 +55,6 @@ async function replyAlreadyQuoted(ctx: OocContext) {
 
 const botUsername = BOT_USERNAME.toLowerCase();
 ooc.on("message:text", async (ctx, next) => {
-  const chatInfo = await ctx.getChat();
-  console.log(chatInfo);
   // await removeFromGroup(chatInfo, ctx);
   const receivedMessage = ctx.update.message;
   const isPureMention = receivedMessage.text

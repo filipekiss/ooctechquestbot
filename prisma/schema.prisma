@@ -1,0 +1,61 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model BotChat {
+  //  Common fields
+  id                  Int                  @id @default(autoincrement())
+  type                String
+  is_enabled          Boolean              @default(true)
+  telegram_id         Int                  @unique
+  title               String
+  TelegramPrivateChat TelegramPrivateChat?
+  TelegramGroupChat   TelegramGroupChat?
+  users               TelegramUser[]
+  created_at          DateTime             @default(now())
+  updated_at          DateTime             @updatedAt
+}
+
+model TelegramGroupChat {
+  id          Int      @id @default(autoincrement())
+  type        String
+  chat        BotChat  @relation(fields: [bot_chat_id], references: [id])
+  bot_chat_id Int      @unique
+  telegram_id Int      @unique
+  title       String
+  permissions Json?
+  photo       Json?
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+}
+
+model TelegramPrivateChat {
+  id                   Int      @id @default(autoincrement())
+  type                 String
+  chat                 BotChat  @relation(fields: [bot_chat_id], references: [id])
+  bot_chat_id          Int      @unique
+  telegram_id          Int      @unique
+  has_private_forwards Boolean?
+  photo                Json?
+  created_at           DateTime @default(now())
+  updated_at           DateTime @updatedAt
+}
+
+model TelegramUser {
+  id          Int       @id @default(autoincrement())
+  chats       BotChat[]
+  telegram_id Int       @unique
+  first_name  String?
+  last_name   String?
+  username    String?
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+}
