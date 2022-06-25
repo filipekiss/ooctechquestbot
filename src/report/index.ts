@@ -6,6 +6,7 @@ import { OocContext } from "../config";
 import { DB_FOLDER } from "../config/environment";
 import { BotModule } from "../main";
 import { replyToReply, replyToSender } from "../utils/message";
+import { withNext } from "../utils/middleware";
 import { generateStreakImage } from "./generate-streak-image";
 import { isReply } from "./is-message-reply.filter";
 
@@ -77,7 +78,7 @@ const today = format(new Date(), "T");
 async function sendReport(ctx: OocContext, isReport?: boolean) {
   await ctx.replyWithChatAction("upload_photo");
   const streakData = await getStreakData(today);
-  return ctx.replyWithPhoto(
+  ctx.replyWithPhoto(
     new InputFile(
       await generateStreakImage(
         streakData.currentStreak.toString(),
@@ -97,37 +98,46 @@ report
   .filter((x) => {
     return !isReply(x);
   })
-  .command(`report`, async (ctx) => {
-    return sendReport(ctx);
-  });
+  .command(
+    `report`,
+    withNext(async (ctx) => {
+      sendReport(ctx);
+    })
+  );
 
 // command with reply
-report.filter(isReply).command(`report`, async (ctx) => {
-  if (ctx.message && ctx.message.reply_to_message) {
-    const receivedMessage = ctx.message;
-    const reportedMessage = receivedMessage.reply_to_message as ReplyMessage;
-    // Check if message has been reported
-    if (await reportDB.get(reportedMessage.message_id.toString())) {
-      return replyAlreadyReported(ctx);
-    }
-    const { longestStreak, currentStreak } = await getStreakData(today);
-    updateStreakWithLargest(longestStreak, currentStreak);
-    await reportDB.set(REPORT_SCHEMA.LAST_INCIDENT_DATE, today);
-    await reportDB.set(
-      REPORT_SCHEMA.LAST_REPORTED_MESSAGE_ID,
-      reportedMessage.message_id
-    );
-    await reportDB.set(reportedMessage.message_id.toString(), reportedMessage);
-
-    return sendReport(ctx, true).then(async () => {
-      try {
-        await receivedMessage.delete();
-      } catch {
-        console.error("Unable to delete message. Skipping...");
+report.filter(isReply).command(
+  `report`,
+  withNext(async (ctx) => {
+    if (ctx.message && ctx.message.reply_to_message) {
+      const receivedMessage = ctx.message;
+      const reportedMessage = receivedMessage.reply_to_message as ReplyMessage;
+      // Check if message has been reported
+      if (await reportDB.get(reportedMessage.message_id.toString())) {
+        return replyAlreadyReported(ctx);
       }
-    });
-  }
-});
+      const { longestStreak, currentStreak } = await getStreakData(today);
+      updateStreakWithLargest(longestStreak, currentStreak);
+      await reportDB.set(REPORT_SCHEMA.LAST_INCIDENT_DATE, today);
+      await reportDB.set(
+        REPORT_SCHEMA.LAST_REPORTED_MESSAGE_ID,
+        reportedMessage.message_id
+      );
+      await reportDB.set(
+        reportedMessage.message_id.toString(),
+        reportedMessage
+      );
+
+      return sendReport(ctx, true).then(async () => {
+        try {
+          await receivedMessage.delete();
+        } catch {
+          console.error("Unable to delete message. Skipping...");
+        }
+      });
+    }
+  })
+);
 
 export const reportModule: BotModule = {
   composer: report,

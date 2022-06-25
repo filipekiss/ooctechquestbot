@@ -3,6 +3,7 @@ import { OocContext } from "../config";
 import { DEFAULT_AUDIO_FOLDER } from "../config/environment";
 import { BotModule } from "../main";
 import { replyToReply } from "../utils/message";
+import { withNext } from "../utils/middleware";
 
 export const repetida = new Composer<OocContext>();
 
@@ -30,8 +31,8 @@ const sendAudio = async (ctx: OocContext) => {
     }
   }
 };
-repetida.hears(/boca de leite/i, sendAudio);
-repetida.command("repetida", sendAudio);
+repetida.hears(/boca de leite/i, withNext(sendAudio));
+repetida.command("repetida", withNext(sendAudio));
 
 export const repetidaModule: BotModule = {
   command: "repetida",

@@ -54,16 +54,14 @@ async function replyAlreadyQuoted(ctx: OocContext) {
 }
 
 const botUsername = BOT_USERNAME.toLowerCase();
-ooc.on("message:text", async (ctx, next) => {
-  // await removeFromGroup(chatInfo, ctx);
+ooc.on("message:entities:mention", async (ctx, next) => {
   const receivedMessage = ctx.update.message;
   const isPureMention = receivedMessage.text
     .toLowerCase()
     .startsWith(botUsername);
 
-  console.log({ isPureMention, text: receivedMessage.text, botUsername });
-
   const messageToQuote = receivedMessage.reply_to_message;
+
   if (isPureMention && receivedMessage && messageToQuote) {
     console.log("The message was a reply, forwarding to archive channel");
 

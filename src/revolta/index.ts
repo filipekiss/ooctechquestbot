@@ -2,12 +2,13 @@ import { Composer } from "grammy";
 import { OocContext } from "../config";
 import { BotModule } from "../main";
 import { replyToReplyOrToSender } from "../utils/message";
+import { withNext } from "../utils/middleware";
 
 export const revolta = new Composer<OocContext>();
 
-const replyRevolta = revolta.command(
+revolta.command(
   ["revolta", "porra"],
-  async (context: OocContext) => {
+  withNext(async (context: OocContext) => {
     const receivedMessage = context.update.message;
     await context.reply("(╯°□°）╯︵ ┻━┻", {
       ...replyToReplyOrToSender(context),
@@ -19,7 +20,7 @@ const replyRevolta = revolta.command(
         console.error("Unable to delete message. Skipping...");
       }
     }
-  }
+  })
 );
 
 export const revoltaModule: BotModule = {

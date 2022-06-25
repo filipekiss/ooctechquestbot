@@ -6,11 +6,8 @@ import {
   disableBotInChat,
   getBotChatByTelegramChatId,
   linkChatToUser,
-  upsertTelegramGroupChat,
-  upsertTelegramPrivateChat,
 } from "../data/chat";
 import { upsertTelegramUser } from "../data/user";
-import { GroupGetChat } from "../utils/chat";
 
 type OocMiddleware = MiddlewareFn<OocContext>;
 

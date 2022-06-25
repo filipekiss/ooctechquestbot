@@ -5,6 +5,7 @@ import Keyv from "keyv";
 import { ReplyMessage } from "@grammyjs/types";
 import { MessageX } from "@grammyjs/hydrate/out/data/message";
 import { replyToSender } from "../utils/message";
+import { withNext } from "../utils/middleware";
 
 const NFT_Meanings = [
   "Não Faço Trabalho",
@@ -36,12 +37,15 @@ async function getNftMeaning() {
 }
 
 export const nft = new Composer<OocContext>();
-nft.hears(/nft/i, async (ctx) => {
-  const nftMeaning = (await getNftMeaning()).random();
-  return await ctx.reply(`NFT significa "${nftMeaning}"`, {
-    ...replyToSender(ctx),
-  });
-});
+nft.hears(
+  /nft/i,
+  withNext(async (ctx) => {
+    const nftMeaning = (await getNftMeaning()).random();
+    await ctx.reply(`NFT significa "${nftMeaning}"`, {
+      ...replyToSender(ctx),
+    });
+  })
+);
 
 type NftDefinition = {
   n: string;
@@ -129,34 +133,37 @@ function deleteMessage(message: MessageX, timeout: number) {
   }, timeout);
 }
 
-nft.command("mint", async (ctx) => {
-  const action = ctx.match;
-  if (action === "list") {
-    return sendNftList(ctx);
-  }
-  const [n, f, t] = ctx.match.split(" ");
-  if (!n || !f || !t || !isValidNftMeaning(n, f, t))
-    return replyInvalidMeaning(ctx);
-  const definition = {
-    n: titleCase(n),
-    f: titleCase(f),
-    t: titleCase(t),
-    message: ctx.message as ReplyMessage,
-  };
-  const existingDefinition = await nftDB.get(joinNft(definition));
-  if (existingDefinition || NFT_Meanings.includes(joinNft(definition))) {
-    return replyAlreadyAdded(ctx);
-  }
-  await addDefinition(definition);
-  const receivedMessage = ctx.message!;
-  const botReply = await ctx.reply(`Definição adicionada`, {
-    reply_to_message_id: receivedMessage.message_id,
-  });
-  const timeout = 15000;
-  deleteMessage(receivedMessage, timeout);
-  deleteMessage(botReply, timeout);
-  return;
-});
+nft.command(
+  "mint",
+  withNext(async (ctx) => {
+    const action = ctx.match as string;
+    if (action === "list") {
+      return sendNftList(ctx);
+    }
+    const [n, f, t] = action.split(" ");
+    if (!n || !f || !t || !isValidNftMeaning(n, f, t))
+      return replyInvalidMeaning(ctx);
+    const definition = {
+      n: titleCase(n),
+      f: titleCase(f),
+      t: titleCase(t),
+      message: ctx.message as ReplyMessage,
+    };
+    const existingDefinition = await nftDB.get(joinNft(definition));
+    if (existingDefinition || NFT_Meanings.includes(joinNft(definition))) {
+      return replyAlreadyAdded(ctx);
+    }
+    await addDefinition(definition);
+    const receivedMessage = ctx.message!;
+    const botReply = await ctx.reply(`Definição adicionada`, {
+      reply_to_message_id: receivedMessage.message_id,
+    });
+    const timeout = 15000;
+    deleteMessage(receivedMessage, timeout);
+    deleteMessage(botReply, timeout);
+    return;
+  })
+);
 
 export const nftModule = {
   composer: nft,

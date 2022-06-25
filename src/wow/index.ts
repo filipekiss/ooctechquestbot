@@ -1,4 +1,4 @@
-import { Message, ParseMode } from "@grammyjs/types";
+import { ParseMode } from "@grammyjs/types";
 import got from "got";
 import { Composer } from "grammy";
 import { OocContext } from "../config";
@@ -8,7 +8,7 @@ import { replyToReplyOrToSender } from "../utils/message";
 const wowApi =
   "https://owen-wilson-wow-api.herokuapp.com/wows/random?results=1";
 
-const wowPattern = /(wow|uau|woow|uou)/gim;
+const wowPattern = /(\bwow|\buau|\bwoow|\buou)/gim;
 
 export const wow = new Composer<OocContext>();
 wow.hears(wowPattern, async (ctx) => {

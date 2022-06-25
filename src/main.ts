@@ -114,7 +114,7 @@ const help = (commandsRegister: any) => {
 };
 
 bot.use(hydrate());
-addModuleToBot(badumtsModule);
+bot.use(metadataMiddleware);
 addModuleToBot(nftModule);
 addModuleToBot(revoltaModule);
 addModuleToBot(reportModule);
@@ -125,11 +125,10 @@ addModuleToBot(banModule);
 addModuleToBot(banReasonModule);
 addModuleToBot(deliriosModule);
 addModuleToBot(quoteModule);
+addModuleToBot(badumtsModule);
+bot.use(help(commandRegister));
 bot.use(lazer);
 bot.use(simpleReply);
-bot.use(help(commandRegister));
-
-// these must come last
 bot.use(paolica);
 bot.use(salpicao);
 bot.use(referral);
