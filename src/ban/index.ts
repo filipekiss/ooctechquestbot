@@ -44,9 +44,9 @@ ban.command(
         return;
       }
       const bannedPersonName = bannedPerson.first_name;
-      const bannedPersonPronoun = await getUserPronounByTelegramId(
+      const bannedPersonPronoun = (await getUserPronounByTelegramId(
         bannedPerson.id
-      );
+      )) as Pronoun;
       console.log(bannedPersonPronoun);
       const bannedMessageFormat =
         banMessageFormat[bannedPersonPronoun] || banMessageFormat[Pronoun.THEY];
