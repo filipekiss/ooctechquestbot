@@ -1,5 +1,7 @@
+import { TelegramUser } from ".prisma/client";
 import { Message, User } from "@grammyjs/types";
 import { dbClient, JsonObject } from "./client";
+import { getUserById } from "./user";
 
 export const getQuoteByKey = (key: string) => {
   return dbClient.quote.findUnique({
@@ -78,4 +80,73 @@ export const incrementUsesCountById = (id: number) => {
       },
     },
   });
+};
+
+export const getQuoteStats = async () => {
+  const totalQuotes = await dbClient.quote.count();
+  const topThreeUsedQuotes = await dbClient.quote.findMany({
+    select: {
+      key: true,
+      uses: true,
+    },
+    orderBy: {
+      uses: "desc",
+    },
+    where: {
+      uses: {
+        gt: 0,
+      },
+    },
+    take: 3,
+  });
+  const [topQuotedUser] = await Promise.all(
+    (
+      await dbClient.quote.groupBy({
+        by: ["author_id"],
+        take: 1,
+        _count: {
+          id: true,
+        },
+        orderBy: {
+          _count: {
+            id: "desc",
+          },
+        },
+      })
+    ).map(async (quote) => {
+      const author = (await getUserById(quote.author_id)) as TelegramUser;
+      return {
+        ...quote,
+        author,
+      };
+    })
+  );
+  const [topQuoteAuthor] = await Promise.all(
+    (
+      await dbClient.quote.groupBy({
+        by: ["quoted_by_id"],
+        take: 1,
+        _count: {
+          id: true,
+        },
+        orderBy: {
+          _count: {
+            id: "desc",
+          },
+        },
+      })
+    ).map(async (quote) => {
+      const author = (await getUserById(quote.quoted_by_id)) as TelegramUser;
+      return {
+        ...quote,
+        author,
+      };
+    })
+  );
+  return {
+    totalQuotes,
+    topThreeUsedQuotes,
+    topQuotedUser,
+    topQuoteAuthor,
+  };
 };

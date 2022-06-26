@@ -6,6 +6,7 @@ import {
   getAllQuoteKeys,
   getQuoteByKey,
   getQuoteByMessageId,
+  getQuoteStats,
   incrementUsesCountById,
 } from "../data/quote";
 import { BotModule, mdEscape } from "../main";
@@ -39,7 +40,7 @@ quote.command("quote", async (ctx, next) => {
   const receivedMessage = ctx.update.message;
   const [actionOrKey, key] = ctx.match?.split(" ");
 
-  const reservedWords = ["add", "del", "delete", "remove"];
+  const reservedWords = ["add", "del", "delete", "remove", "list", "stats"];
 
   if (reservedWords.includes(key)) {
     ctx.reply(`Você não pode usar "${key}" nesse contexto`, {
@@ -131,6 +132,48 @@ quote.command("quote", async (ctx, next) => {
           }
         );
       }
+      await next();
+      return;
+    }
+
+    case "stats": {
+      const quoteStats = await getQuoteStats();
+      ctx.replyWithChatAction("typing");
+      console.dir(
+        {
+          quoteStats,
+        },
+        { depth: null }
+      );
+      const output: string[] = [];
+      output.push(`*Quantidade de Quotes*: ${quoteStats.totalQuotes}`);
+      const { topQuotedUser } = quoteStats;
+      output.push(
+        `*Usuário mais citado*: ${
+          topQuotedUser.author.username
+            ? topQuotedUser.author.username
+            : `${topQuotedUser.author.first_name} ${topQuotedUser.author.last_name}`
+        }`
+      );
+      const { topQuoteAuthor } = quoteStats;
+      output.push(
+        `*Usuário que mais criou quotes*: ${
+          topQuoteAuthor.author.username
+            ? topQuoteAuthor.author.username
+            : `${topQuoteAuthor.author.first_name} ${topQuoteAuthor.author.last_name}`
+        }`
+      );
+      const { topThreeUsedQuotes } = quoteStats;
+      output.push(
+        `*Top ${
+          topThreeUsedQuotes.length
+        } quotes mais usadas*\n${topThreeUsedQuotes
+          .map((quote) => ` • \`${quote.key}\` - ${quote.uses}`)
+          .join("\n")}`
+      );
+      ctx.reply(mdEscape(output.join("\n")), {
+        ...sendAsMarkdown(),
+      });
       await next();
       return;
     }

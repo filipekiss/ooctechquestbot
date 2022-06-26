@@ -15,3 +15,11 @@ export const upsertTelegramUser = async (user: User) => {
     },
   });
 };
+
+export const getUserById = async (id: number) => {
+  return dbClient.telegramUser.findUnique({
+    where: {
+      id,
+    },
+  });
+};
