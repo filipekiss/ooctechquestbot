@@ -1,3 +1,4 @@
+import { Pronoun } from ".prisma/client";
 import { User } from "@grammyjs/types";
 import { dbClient } from "./client";
 
@@ -22,4 +23,33 @@ export const getUserById = async (id: number) => {
       id,
     },
   });
+};
+
+export const updateUserPronounByTelegramId = async (
+  id: number,
+  pronoun: Pronoun
+) => {
+  return dbClient.telegramUser.update({
+    where: {
+      telegram_id: id,
+    },
+    data: {
+      pronoun,
+    },
+  });
+};
+
+export const getUserPronounByTelegramId = async (id: number) => {
+  const pronoun = await dbClient.telegramUser.findUnique({
+    where: {
+      telegram_id: id,
+    },
+    select: {
+      pronoun: true,
+    },
+  });
+  if (pronoun) {
+    return pronoun.pronoun;
+  }
+  return Pronoun.THEY;
 };

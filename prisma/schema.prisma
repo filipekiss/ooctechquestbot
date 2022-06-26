@@ -60,6 +60,7 @@ model TelegramUser {
   updated_at   DateTime  @updatedAt
   quotes       Quote[]   @relation("author")
   added_quotes Quote[]   @relation("quoted_by")
+  pronoun      Pronoun?  @default(THEY)
 }
 
 model Quote {
@@ -73,4 +74,10 @@ model Quote {
   message      Json
   chat_id      String
   uses         Int          @default(0)
+}
+
+enum Pronoun {
+  HE
+  SHE
+  THEY
 }

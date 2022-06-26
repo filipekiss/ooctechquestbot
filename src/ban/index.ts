@@ -2,18 +2,19 @@ import { Composer } from "grammy";
 import { BotModule } from "../main";
 import { OocContext } from "../config";
 import { getBanReason } from "./reason";
-import { getUserPronouns, PRONOUNS } from "../prounous";
 import { replyToReply } from "../utils/message";
 import { withNext } from "../utils/middleware";
+import { Pronoun } from ".prisma/client";
+import { getUserPronounByTelegramId } from "../data/user";
 
 export const ban = new Composer<OocContext>();
 
 const banMessageFormat = {
-  [PRONOUNS.HE]: (person: string, reason: string) =>
+  [Pronoun.HE]: (person: string, reason: string) =>
     `${person} foi banido por ${reason}`,
-  [PRONOUNS.SHE]: (person: string, reason: string) =>
+  [Pronoun.SHE]: (person: string, reason: string) =>
     `${person} foi banida por ${reason}`,
-  [PRONOUNS.THEY]: (person: string, reason: string) =>
+  [Pronoun.THEY]: (person: string, reason: string) =>
     `${person} foi banide por ${reason}`,
 };
 
@@ -43,11 +44,12 @@ ban.command(
         return;
       }
       const bannedPersonName = bannedPerson.first_name;
-      const bannedPersonPronoun = await getUserPronouns(bannedPerson);
+      const bannedPersonPronoun = await getUserPronounByTelegramId(
+        bannedPerson.id
+      );
       console.log(bannedPersonPronoun);
       const bannedMessageFormat =
-        banMessageFormat[bannedPersonPronoun as unknown as PRONOUNS] ||
-        banMessageFormat[PRONOUNS.THEY];
+        banMessageFormat[bannedPersonPronoun] || banMessageFormat[Pronoun.THEY];
       await context.reply(bannedMessageFormat(bannedPersonName, banReason), {
         ...replyToReply(context),
       });

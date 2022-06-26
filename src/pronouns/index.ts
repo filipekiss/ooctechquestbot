@@ -1,33 +1,26 @@
+import { Pronoun } from ".prisma/client";
 import { User } from "@grammyjs/types";
 import { Composer, Keyboard, NextFunction } from "grammy";
-import Keyv from "keyv";
 import { OocContext } from "../config";
-import { BOT_MESSAGE_TRACKER, DB_FOLDER } from "../config/environment";
+import { BOT_MESSAGE_TRACKER } from "../config/environment";
+import { updateUserPronounByTelegramId } from "../data/user";
 import { BotModule } from "../main";
 import { replyToSender } from "../utils/message";
 
 export const pronouns = new Composer<OocContext>();
 
-const pronounsDB = new Keyv(`sqlite://${DB_FOLDER}/pronouns.sqlite`);
-
-export enum PRONOUNS {
-  HE = "HE",
-  SHE = "SHE",
-  THEY = "THEY",
-}
-
 const PRONOUNS_TRIGGERS = {
-  [PRONOUNS.HE]: `${BOT_MESSAGE_TRACKER}Ele/Dele`,
-  [PRONOUNS.SHE]: `${BOT_MESSAGE_TRACKER}Ela/Dela`,
-  [PRONOUNS.THEY]: `${BOT_MESSAGE_TRACKER}Elu/Delu`,
+  [Pronoun.HE]: `${BOT_MESSAGE_TRACKER}Ele/Dele`,
+  [Pronoun.SHE]: `${BOT_MESSAGE_TRACKER}Ela/Dela`,
+  [Pronoun.THEY]: `${BOT_MESSAGE_TRACKER}Elu/Delu`,
 };
 
 const pronounsKeyboard = new Keyboard()
-  .text(PRONOUNS_TRIGGERS[PRONOUNS.SHE])
+  .text(PRONOUNS_TRIGGERS[Pronoun.SHE])
   .row()
-  .text(PRONOUNS_TRIGGERS[PRONOUNS.HE])
+  .text(PRONOUNS_TRIGGERS[Pronoun.HE])
   .row()
-  .text(PRONOUNS_TRIGGERS[PRONOUNS.THEY]);
+  .text(PRONOUNS_TRIGGERS[Pronoun.THEY]);
 
 const isGroupChat = (chatId: string) => chatId.startsWith("-");
 
@@ -50,21 +43,11 @@ pronouns.command(["pronome", "pronomes"], async (ctx, next) => {
   return;
 });
 
-async function updateUserPronouns(user: User, pronouns: PRONOUNS) {
-  console.log({ user, pronouns });
-  await pronounsDB.set(String(user.id), pronouns);
+async function updateUserPronouns(user: User, pronoun: Pronoun) {
+  await updateUserPronounByTelegramId(user.id, pronoun);
 }
 
-export async function getUserPronouns(user: User) {
-  const pronouns = (await pronounsDB.get(String(user.id))) as PRONOUNS;
-  console.log({ pronouns });
-  if (pronouns) {
-    return PRONOUNS[pronouns];
-  }
-  return PRONOUNS.THEY;
-}
-
-function makePronounTrigger(pronoun: PRONOUNS) {
+function makePronounTrigger(pronoun: Pronoun) {
   return async (ctx: OocContext, next: NextFunction) => {
     const from = ctx.message?.from;
     if (!from) {
@@ -88,14 +71,11 @@ function makePronounTrigger(pronoun: PRONOUNS) {
   };
 }
 
+pronouns.hears(PRONOUNS_TRIGGERS[Pronoun.SHE], makePronounTrigger(Pronoun.SHE));
+pronouns.hears(PRONOUNS_TRIGGERS[Pronoun.HE], makePronounTrigger(Pronoun.HE));
 pronouns.hears(
-  PRONOUNS_TRIGGERS[PRONOUNS.SHE],
-  makePronounTrigger(PRONOUNS.SHE)
-);
-pronouns.hears(PRONOUNS_TRIGGERS[PRONOUNS.HE], makePronounTrigger(PRONOUNS.HE));
-pronouns.hears(
-  PRONOUNS_TRIGGERS[PRONOUNS.THEY],
-  makePronounTrigger(PRONOUNS.THEY)
+  PRONOUNS_TRIGGERS[Pronoun.THEY],
+  makePronounTrigger(Pronoun.THEY)
 );
 
 export const pronounModule: BotModule = {

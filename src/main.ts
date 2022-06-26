@@ -17,7 +17,7 @@ import { banModule } from "./ban";
 import { wow } from "./wow";
 import { referral } from "./referral";
 import { banReasonModule } from "./ban/reason";
-import { pronounModule } from "./prounous";
+import { pronounModule } from "./pronouns";
 import { deliriosModule } from "./delirio";
 import { simpleReply } from "./simple-reply";
 import { lazer } from "./lazer";
