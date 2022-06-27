@@ -10,6 +10,7 @@ import {
 } from "../data/user";
 import { BotModule } from "../main";
 import { replyToSender } from "../utils/message";
+import { withNext } from "../utils/middleware";
 
 export const pronouns = new Composer<OocContext>();
 
@@ -17,14 +18,20 @@ const PRONOUNS_TRIGGERS = {
   [Pronoun.HE]: `${BOT_MESSAGE_TRACKER}Ele/Dele 💁‍♂️`,
   [Pronoun.SHE]: `${BOT_MESSAGE_TRACKER}Ela/Dela 💁‍♀️`,
   [Pronoun.THEY]: `${BOT_MESSAGE_TRACKER}Elu/Delu 💁`,
+  nochange: (currentPronoun: string) => {
+    return `${BOT_MESSAGE_TRACKER}Manter ${currentPronoun}`;
+  },
 };
 
-const pronounsKeyboard = new Keyboard()
-  .text(PRONOUNS_TRIGGERS[Pronoun.SHE])
-  .row()
-  .text(PRONOUNS_TRIGGERS[Pronoun.HE])
-  .row()
-  .text(PRONOUNS_TRIGGERS[Pronoun.THEY]);
+const pronounsKeyboardCreate = (currentPronoun: string) =>
+  new Keyboard()
+    .text(PRONOUNS_TRIGGERS[Pronoun.SHE])
+    .row()
+    .text(PRONOUNS_TRIGGERS[Pronoun.HE])
+    .row()
+    .text(PRONOUNS_TRIGGERS[Pronoun.THEY])
+    .row()
+    .text(PRONOUNS_TRIGGERS.nochange(currentPronoun));
 
 const isGroupChat = (chatId: string) => chatId.startsWith("-");
 
@@ -41,7 +48,7 @@ pronouns.command(["pronome", "pronomes"], async (ctx, next) => {
     await next();
     return;
   }
-  const currentPronoun = await getUserPronounByTelegramId(
+  const currentPronounEnum = await getUserPronounByTelegramId(
     ctx.from.id as number
   );
   const pronounsChamado = {
@@ -49,13 +56,14 @@ pronouns.command(["pronome", "pronomes"], async (ctx, next) => {
     [Pronoun.SHE]: "chamada",
     [Pronoun.THEY]: "chamade",
   };
+  const currentPronoun = PRONOUNS_TRIGGERS[currentPronounEnum];
   await ctx.reply(
-    `Como você prefere ser ${pronounsChamado[currentPronoun]}? (Seu pronome atual é ${PRONOUNS_TRIGGERS[currentPronoun]})`,
+    `Como você prefere ser ${pronounsChamado[currentPronounEnum]}? (Seu pronome atual é ${currentPronoun})`,
     {
       ...replyToSender(ctx),
       reply_markup: {
         one_time_keyboard: true,
-        keyboard: pronounsKeyboard.build(),
+        keyboard: pronounsKeyboardCreate(currentPronoun).build(),
       },
     }
   );
@@ -81,7 +89,7 @@ function makePronounTrigger(pronoun: Pronoun) {
         pronoun
       ].replace(BOT_MESSAGE_TRACKER, "")}`,
       {
-        reply_to_message_id: ctx.message.message_id,
+        ...replyToSender(ctx),
         reply_markup: {
           remove_keyboard: true,
         },
@@ -96,6 +104,12 @@ pronouns.hears(PRONOUNS_TRIGGERS[Pronoun.HE], makePronounTrigger(Pronoun.HE));
 pronouns.hears(
   PRONOUNS_TRIGGERS[Pronoun.THEY],
   makePronounTrigger(Pronoun.THEY)
+);
+pronouns.hears(
+  new RegExp(PRONOUNS_TRIGGERS.nochange("")),
+  withNext(async (ctx) => {
+    ctx.reply("Ok! Não vou alterar seu pronome.", replyToSender(ctx));
+  })
 );
 
 export const pronounModule: BotModule = {
