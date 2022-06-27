@@ -48,7 +48,7 @@ export const getUserPronounByTelegramId = async (id: number) => {
       pronoun: true,
     },
   });
-  if (pronoun) {
+  if (pronoun?.pronoun) {
     return pronoun.pronoun;
   }
   return Pronoun.THEY;

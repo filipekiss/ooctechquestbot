@@ -3,16 +3,20 @@ import { User } from "@grammyjs/types";
 import { Composer, Keyboard, NextFunction } from "grammy";
 import { OocContext } from "../config";
 import { BOT_MESSAGE_TRACKER } from "../config/environment";
-import { updateUserPronounByTelegramId } from "../data/user";
+import {
+  getUserById,
+  getUserPronounByTelegramId,
+  updateUserPronounByTelegramId,
+} from "../data/user";
 import { BotModule } from "../main";
 import { replyToSender } from "../utils/message";
 
 export const pronouns = new Composer<OocContext>();
 
 const PRONOUNS_TRIGGERS = {
-  [Pronoun.HE]: `${BOT_MESSAGE_TRACKER}Ele/Dele`,
-  [Pronoun.SHE]: `${BOT_MESSAGE_TRACKER}Ela/Dela`,
-  [Pronoun.THEY]: `${BOT_MESSAGE_TRACKER}Elu/Delu`,
+  [Pronoun.HE]: `${BOT_MESSAGE_TRACKER}Ele/Dele 💁‍♂️`,
+  [Pronoun.SHE]: `${BOT_MESSAGE_TRACKER}Ela/Dela 💁‍♀️`,
+  [Pronoun.THEY]: `${BOT_MESSAGE_TRACKER}Elu/Delu 💁`,
 };
 
 const pronounsKeyboard = new Keyboard()
@@ -32,13 +36,29 @@ pronouns.command(["pronome", "pronomes"], async (ctx, next) => {
     await next();
     return;
   }
-  await ctx.reply("Como você prefere ser chamado?", {
-    ...replyToSender(ctx),
-    reply_markup: {
-      one_time_keyboard: true,
-      keyboard: pronounsKeyboard.build(),
-    },
-  });
+  if (!ctx.from) {
+    // no from, ignore the message
+    await next();
+    return;
+  }
+  const currentPronoun = await getUserPronounByTelegramId(
+    ctx.from.id as number
+  );
+  const pronounsChamado = {
+    [Pronoun.HE]: "chamado",
+    [Pronoun.SHE]: "chamada",
+    [Pronoun.THEY]: "chamade",
+  };
+  await ctx.reply(
+    `Como você prefere ser ${pronounsChamado[currentPronoun]}? (Seu pronome atual é ${PRONOUNS_TRIGGERS[currentPronoun]})`,
+    {
+      ...replyToSender(ctx),
+      reply_markup: {
+        one_time_keyboard: true,
+        keyboard: pronounsKeyboard.build(),
+      },
+    }
+  );
   await next();
   return;
 });
