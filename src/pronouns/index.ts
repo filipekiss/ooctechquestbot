@@ -9,7 +9,7 @@ import {
   updateUserPronounByTelegramId,
 } from "../data/user";
 import { BotModule } from "../main";
-import { replyToSender } from "../utils/message";
+import { removeKeyboard, replyToSender } from "../utils/message";
 import { withNext } from "../utils/middleware";
 
 export const pronouns = new Composer<OocContext>();
@@ -90,9 +90,7 @@ function makePronounTrigger(pronoun: Pronoun) {
       ].replace(BOT_MESSAGE_TRACKER, "")}`,
       {
         ...replyToSender(ctx),
-        reply_markup: {
-          remove_keyboard: true,
-        },
+        ...removeKeyboard(),
       }
     );
     await next();
@@ -108,7 +106,10 @@ pronouns.hears(
 pronouns.hears(
   new RegExp(PRONOUNS_TRIGGERS.nochange("")),
   withNext(async (ctx) => {
-    ctx.reply("Ok! Não vou alterar seu pronome.", replyToSender(ctx));
+    ctx.reply("Ok! Não vou alterar seu pronome.", {
+      ...replyToSender(ctx),
+      ...removeKeyboard(),
+    });
   })
 );
 

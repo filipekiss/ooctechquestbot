@@ -25,3 +25,13 @@ export const sendAsMarkdown = (): { parse_mode: "MarkdownV2" } => {
     parse_mode: "MarkdownV2",
   };
 };
+
+export const removeKeyboard = (): {
+  reply_markup: { remove_keyboard: true };
+} => {
+  return {
+    reply_markup: {
+      remove_keyboard: true,
+    },
+  };
+};

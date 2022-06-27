@@ -1,7 +1,7 @@
 import { Composer } from "grammy";
 import { OocContext } from "../config";
 import { BotModule } from "../main";
-import { replyToSender } from "../utils/message";
+import { removeKeyboard, replyToSender } from "../utils/message";
 import { withNext } from "../utils/middleware";
 
 export const keyboard = new Composer<OocContext>();
@@ -13,9 +13,7 @@ keyboard.command(
     const receivedMessage = ctx.message!;
     const botReply = await ctx.reply("Tentando desativar o teclado...", {
       ...replyToSender(ctx),
-      reply_markup: {
-        remove_keyboard: true,
-      },
+      ...removeKeyboard(),
     });
     setTimeout(async () => {
       try {
