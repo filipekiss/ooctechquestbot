@@ -24,6 +24,7 @@ import { lazer } from "./lazer";
 import { replyToSender } from "./utils/message";
 import { quoteModule } from "./quote";
 import { metadataMiddleware } from "./metadata";
+import { reportStatsModule } from "./report/stats";
 
 setup();
 console.log("Starting...");
@@ -118,6 +119,7 @@ bot.use(metadataMiddleware);
 addModuleToBot(nftModule);
 addModuleToBot(revoltaModule);
 addModuleToBot(reportModule);
+addModuleToBot(reportStatsModule);
 addModuleToBot(keyboardModule);
 addModuleToBot(pronounModule);
 addModuleToBot(repetidaModule);

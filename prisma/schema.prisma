@@ -50,17 +50,19 @@ model TelegramPrivateChat {
 }
 
 model TelegramUser {
-  id           Int       @id @default(autoincrement())
+  id           Int               @id @default(autoincrement())
   chats        BotChat[]
-  telegram_id  Int       @unique
+  telegram_id  Int               @unique
   first_name   String?
   last_name    String?
   username     String?
-  created_at   DateTime  @default(now())
-  updated_at   DateTime  @updatedAt
-  quotes       Quote[]   @relation("author")
-  added_quotes Quote[]   @relation("quoted_by")
-  pronoun      Pronoun?  @default(THEY)
+  created_at   DateTime          @default(now())
+  updated_at   DateTime          @updatedAt
+  quotes       Quote[]           @relation("author")
+  added_quotes Quote[]           @relation("quoted_by")
+  pronoun      Pronoun?          @default(THEY)
+  reports      ReportedMessage[] @relation("reporter")
+  reported     ReportedMessage[] @relation("reported")
 }
 
 model Quote {
@@ -76,6 +78,27 @@ model Quote {
   uses         Int          @default(0)
   created_at   DateTime     @default(now())
   updated_at   DateTime     @default(now()) @updatedAt
+}
+
+// This table is used to store some metadata for the bot that would not fit a
+// relational schema. Use value to save a string and json to save a json
+model BotMeta {
+  key   String  @unique
+  value String?
+  json  Json?
+
+}
+
+model ReportedMessage {
+  id          Int          @id @default(autoincrement())
+  reporter    TelegramUser @relation("reporter", fields: [reporter_id], references: [id])
+  reporter_id Int
+  reported    TelegramUser @relation("reported", fields: [reported_id], references: [id])
+  reported_id Int
+  message     Json
+  message_id  Int          @unique
+  created_at  DateTime     @default(now())
+  updated_at  DateTime     @updatedAt
 }
 
 enum Pronoun {

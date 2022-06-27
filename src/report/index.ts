@@ -1,9 +1,9 @@
 import { differenceInCalendarDays, format, parse } from "date-fns";
 import { Composer } from "grammy";
 import { InputFile, ReplyMessage } from "grammy/out/platform";
-import Keyv from "keyv";
 import { OocContext } from "../config";
-import { DB_FOLDER } from "../config/environment";
+import { getMetaValue, setMetaValue } from "../data/meta";
+import { getReportedMessageByMessageId, reportMessage } from "../data/report";
 import { BotModule } from "../main";
 import { replyToReply, replyToSender } from "../utils/message";
 import { withNext } from "../utils/middleware";
@@ -11,9 +11,8 @@ import { generateStreakImage } from "./generate-streak-image";
 import { isReply } from "./is-message-reply.filter";
 
 const REPORT_SCHEMA = {
-  LAST_INCIDENT_DATE: "last_incident_date",
-  LONGEST_STREAK: "longest_streak",
-  LAST_REPORTED_MESSAGE_ID: "last_reported_message_id",
+  LAST_INCIDENT_DATE: "report_last_incident_date",
+  LONGEST_STREAK: "report_longest_streak",
 };
 
 function calculateStreakDifference(laterDate: string, earlierDate: string) {
@@ -25,20 +24,21 @@ function calculateStreakDifference(laterDate: string, earlierDate: string) {
   return differenceInCalendarDays(parsedLaterDate, parsedEarlierDate);
 }
 
-const reportDB = new Keyv(`sqlite://${DB_FOLDER}/report.sqlite`);
 export const report = new Composer<OocContext>();
 
 export async function getStreakData(latestIncidentDate: string) {
-  const previousIncidentDate = await reportDB.get(
+  const previousIncidentDate = (await getMetaValue(
     REPORT_SCHEMA.LAST_INCIDENT_DATE
-  );
+  )) as string;
   const previousStreak: number =
-    (await reportDB.get(REPORT_SCHEMA.LONGEST_STREAK)) || 0;
+    Number(await getMetaValue(REPORT_SCHEMA.LONGEST_STREAK)) || 0;
+  console.log({ latestIncidentDate, previousIncidentDate });
   const currentStreak = calculateStreakDifference(
     latestIncidentDate,
     previousIncidentDate
   );
   const longestStreak = Math.max(currentStreak, previousStreak);
+  console.log({ currentStreak, longestStreak, previousStreak });
   return {
     previousIncidentDate,
     previousStreak,
@@ -51,9 +51,9 @@ async function updateStreakWithLargest(
   currentStreak: number,
   previousStreak: number
 ) {
-  await reportDB.set(
+  await setMetaValue(
     REPORT_SCHEMA.LONGEST_STREAK,
-    Math.max(currentStreak, previousStreak)
+    String(Math.max(currentStreak, previousStreak))
   );
 }
 
@@ -113,20 +113,14 @@ report.filter(isReply).command(
       const receivedMessage = ctx.message;
       const reportedMessage = receivedMessage.reply_to_message as ReplyMessage;
       // Check if message has been reported
-      if (await reportDB.get(reportedMessage.message_id.toString())) {
+      if (await getReportedMessageByMessageId(reportedMessage.message_id)) {
         return replyAlreadyReported(ctx);
       }
       const { longestStreak, currentStreak } = await getStreakData(today);
       updateStreakWithLargest(longestStreak, currentStreak);
-      await reportDB.set(REPORT_SCHEMA.LAST_INCIDENT_DATE, today);
-      await reportDB.set(
-        REPORT_SCHEMA.LAST_REPORTED_MESSAGE_ID,
-        reportedMessage.message_id
-      );
-      await reportDB.set(
-        reportedMessage.message_id.toString(),
-        reportedMessage
-      );
+      await setMetaValue(REPORT_SCHEMA.LAST_INCIDENT_DATE, today);
+      console.log(reportedMessage);
+      await reportMessage(receivedMessage);
 
       return sendReport(ctx, true).then(async () => {
         try {
