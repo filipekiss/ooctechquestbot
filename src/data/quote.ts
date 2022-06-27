@@ -8,6 +8,10 @@ export const getQuoteByKey = (key: string) => {
     where: {
       key,
     },
+    include: {
+      author: true,
+      quoted_by: true,
+    },
   });
 };
 
@@ -65,6 +69,18 @@ export const createQuote = (
           },
         },
       },
+    },
+  });
+};
+
+export const removeQuoteByKey = (key: string) => {
+  return dbClient.quote.delete({
+    where: {
+      key,
+    },
+    include: {
+      author: true,
+      quoted_by: true,
     },
   });
 };

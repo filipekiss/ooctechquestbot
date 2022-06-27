@@ -74,6 +74,8 @@ model Quote {
   message      Json
   chat_id      String
   uses         Int          @default(0)
+  created_at   DateTime     @default(now())
+  updated_at   DateTime     @updatedAt
 }
 
 enum Pronoun {

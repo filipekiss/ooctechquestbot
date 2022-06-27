@@ -8,11 +8,19 @@ import {
   getQuoteByMessageId,
   getQuoteStats,
   incrementUsesCountById,
+  removeQuoteByKey,
 } from "../data/quote";
 import { BotModule, mdEscape } from "../main";
 import { replyToSender, sendAsMarkdown } from "../utils/message";
+import { getUsernameOrFullname } from "../utils/user";
 
 const quote = new Composer<OocContext>();
+
+const replyInexistingQuote = async (key: string, ctx: OocContext) => {
+  ctx.reply(`Não encontrei nenhuma citação com a chave ${key}`, {
+    ...replyToSender(ctx),
+  });
+};
 
 async function replyAlreadyQuoted(ctx: OocContext, quoteKey: string) {
   const receivedMessage = ctx.message!;
@@ -191,13 +199,55 @@ quote.command("quote", async (ctx, next) => {
       return;
     }
 
+    case "delete":
+    case "remove": {
+      if (!key) {
+        ctx.reply(
+          `Você precisa enviar a chave da quote que você quer remover`,
+          replyToSender(ctx)
+        );
+        await next();
+        return;
+      }
+      const quoteToRemove = await getQuoteByKey(key);
+      if (!quoteToRemove) {
+        await replyInexistingQuote(key, ctx);
+        await next();
+        return;
+      }
+      const removeRequestAuthor = ctx.from as User;
+      console.log({ removeRequestAuthor });
+      const canRemoveQuote =
+        removeRequestAuthor.id === quoteToRemove.author.telegram_id ||
+        removeRequestAuthor.id === quoteToRemove.quoted_by.telegram_id;
+      if (!canRemoveQuote) {
+        ctx.reply(
+          "Você não tem permissão para remover essa quote",
+          replyToSender(ctx)
+        );
+        await next();
+        return;
+      }
+      const deletedQuote = await removeQuoteByKey(key);
+      ctx.reply(`Pronto! Removi a quote ${key}`, replyToSender(ctx));
+      ctx.reply(
+        `A quote foi adicionada por ${getUsernameOrFullname(
+          deletedQuote.quoted_by
+        )} e é de autoria de ${getUsernameOrFullname(
+          deletedQuote.author
+        )}. Ela foi usada ${deletedQuote.uses} vez${
+          deletedQuote.uses === 1 ? "" : "es"
+        } antes de ser removida`
+      );
+      await next();
+      return;
+    }
+
     default: {
       // Check if the key is already being used
       const existingQuote = await getQuoteByKey(actionOrKey);
       if (!existingQuote) {
-        ctx.reply("Não encontrei nenhuma citação relacionada", {
-          ...replyToSender(ctx),
-        });
+        replyInexistingQuote(actionOrKey, ctx);
         await next();
         return;
       }
