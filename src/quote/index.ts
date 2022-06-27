@@ -12,7 +12,7 @@ import {
 } from "../data/quote";
 import { BotModule, mdEscape } from "../main";
 import { replyToSender, sendAsMarkdown } from "../utils/message";
-import { getUsernameOrFullname } from "../utils/user";
+import { getUsernameOrFullname, isAdmin } from "../utils/user";
 
 const quote = new Composer<OocContext>();
 
@@ -219,7 +219,8 @@ quote.command("quote", async (ctx, next) => {
       console.log({ removeRequestAuthor });
       const canRemoveQuote =
         removeRequestAuthor.id === quoteToRemove.author.telegram_id ||
-        removeRequestAuthor.id === quoteToRemove.quoted_by.telegram_id;
+        removeRequestAuthor.id === quoteToRemove.quoted_by.telegram_id ||
+        (await isAdmin(ctx));
       if (!canRemoveQuote) {
         ctx.reply(
           "Você não tem permissão para remover essa quote",
@@ -229,8 +230,8 @@ quote.command("quote", async (ctx, next) => {
         return;
       }
       const deletedQuote = await removeQuoteByKey(key);
-      ctx.reply(`Pronto! Removi a quote ${key}`, replyToSender(ctx));
-      ctx.reply(
+      await ctx.reply(`Pronto! Removi a quote ${key}`, replyToSender(ctx));
+      await ctx.reply(
         `A quote foi adicionada por ${getUsernameOrFullname(
           deletedQuote.quoted_by
         )} e é de autoria de ${getUsernameOrFullname(
