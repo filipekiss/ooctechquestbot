@@ -37,13 +37,26 @@ async function replyAlreadyQuoted(ctx: OocContext, quoteKey: string) {
 }
 
 quote.command("quote", async (ctx, next) => {
+  if (!ctx.message?.text) {
+    await next();
+    return;
+  }
   const receivedMessage = ctx.update.message;
   const [actionOrKey, key] = ctx.match?.split(" ");
 
-  const reservedWords = ["add", "del", "delete", "remove", "list", "stats"];
+  const commands = await ctx.api.getMyCommands();
+  const reservedWords = [
+    "add",
+    "del",
+    "delete",
+    "remove",
+    "list",
+    "stats",
+    ...commands.map((command) => command.command),
+  ];
 
   if (reservedWords.includes(key)) {
-    ctx.reply(`Você não pode usar "${key}" nesse contexto`, {
+    ctx.reply(`Você não pode usar "${key}" como uma chave de quote`, {
       ...replyToSender(ctx),
     });
     await next();
@@ -198,6 +211,36 @@ quote.command("quote", async (ctx, next) => {
       return;
     }
   }
+});
+
+quote.on(":entities:bot_command", async (ctx, next) => {
+  if (!ctx.message?.text) {
+    await next();
+    return;
+  }
+  const [currentCommand] = ctx.message.text.split(" ");
+  const commands = await ctx.api.getMyCommands();
+  const commandIsRegistered = commands.find(
+    (command) => `/${command.command}` === currentCommand
+  );
+  if (commandIsRegistered) {
+    await next();
+    return;
+  }
+  const [, quoteKey] = currentCommand.split("/");
+  const existingQuote = await getQuoteByKey(quoteKey);
+  if (!existingQuote) {
+    await next();
+    return;
+  }
+  await incrementUsesCountById(existingQuote.id);
+  ctx.api.forwardMessage(
+    ctx.chat.id,
+    existingQuote.chat_id,
+    existingQuote.message_id
+  );
+  await next();
+  return;
 });
 
 export const quoteModule: BotModule = {
