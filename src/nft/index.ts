@@ -1,6 +1,6 @@
-import { Composer } from "grammy";
+import { Composer, InputFile } from "grammy";
 import { OocContext } from "../config";
-import { DB_FOLDER } from "../config/environment";
+import { DB_FOLDER, DEFAULT_ASSETS_FOLDER } from "../config/environment";
 import Keyv from "keyv";
 import { ReplyMessage } from "@grammyjs/types";
 import { MessageX } from "@grammyjs/hydrate/out/data/message";
@@ -40,6 +40,15 @@ export const nft = new Composer<OocContext>();
 nft.hears(
   /nft/i,
   withNext(async (ctx) => {
+    const shouldSendImage = Math.floor(Math.random() * 10) + 1;
+    if (shouldSendImage > 7) {
+      ctx.replyWithChatAction("upload_photo");
+      await ctx.replyWithPhoto(
+        new InputFile(`${DEFAULT_ASSETS_FOLDER}/nft.jpg`),
+        replyToSender(ctx)
+      );
+      return;
+    }
     const nftMeaning = (await getNftMeaning()).random();
     await ctx.reply(`NFT significa "${nftMeaning}"`, {
       ...replyToSender(ctx),
