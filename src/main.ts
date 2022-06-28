@@ -63,7 +63,6 @@ const help = (commandsRegister: any) => {
   const helpModule = new Composer<OocContext>();
   helpModule.command(["ajuda"], async (ctx: OocContext) => {
     const commandHelp = ctx.match;
-    const receivedMessage = ctx.message!;
     if ((commandHelp as string).toLowerCase() === "luciano") {
       const image = new InputFile("./src/ajuda-luciano.png");
       return ctx.replyWithPhoto(image, {
