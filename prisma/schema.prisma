@@ -87,6 +87,7 @@ model BotMeta {
   key   String  @unique
   value String?
   json  Json?
+  count Int?    @default(0)
 
 }
 
