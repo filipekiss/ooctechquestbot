@@ -1,6 +1,15 @@
-import { Pronoun } from ".prisma/client";
+import { Pronoun, TelegramUser } from ".prisma/client";
 import { User } from "@grammyjs/types";
 import { dbClient } from "./client";
+
+export const getTelegramUserDetails = (user: User) => {
+  return {
+    first_name: user.first_name,
+    last_name: user.last_name ?? null,
+    username: user.username ?? null,
+    telegram_id: user.id,
+  };
+};
 
 export const upsertTelegramUser = async (user: User) => {
   return dbClient.telegramUser.upsert({
@@ -9,10 +18,7 @@ export const upsertTelegramUser = async (user: User) => {
     },
     update: {},
     create: {
-      telegram_id: user.id,
-      username: user.username,
-      first_name: user.first_name,
-      last_name: user.last_name,
+      ...getTelegramUserDetails(user),
     },
   });
 };

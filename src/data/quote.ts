@@ -1,7 +1,7 @@
 import { TelegramUser } from ".prisma/client";
 import { Message, User } from "@grammyjs/types";
 import { dbClient, JsonObject } from "./client";
-import { getUserById } from "./user";
+import { getTelegramUserDetails, getUserById } from "./user";
 
 export const getQuoteByKey = (key: string) => {
   return dbClient.quote.findUnique({
@@ -48,12 +48,7 @@ export const createQuote = (
           where: {
             telegram_id: author.id,
           },
-          create: {
-            telegram_id: author.id,
-            first_name: author.first_name,
-            last_name: author.last_name,
-            username: author.username,
-          },
+          create: getTelegramUserDetails(author),
         },
       },
       quoted_by: {
@@ -61,12 +56,7 @@ export const createQuote = (
           where: {
             telegram_id: quoted_by.id,
           },
-          create: {
-            telegram_id: quoted_by.id,
-            first_name: quoted_by.first_name,
-            last_name: quoted_by.last_name,
-            username: quoted_by.username,
-          },
+          create: getTelegramUserDetails(quoted_by),
         },
       },
     },

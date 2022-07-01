@@ -63,6 +63,7 @@ model TelegramUser {
   pronoun      Pronoun?          @default(THEY)
   reports      ReportedMessage[] @relation("reporter")
   reported     ReportedMessage[] @relation("reported")
+  nft_meanings NftDefinition[]   @relation("nft_meanings")
 }
 
 model Quote {
@@ -99,6 +100,16 @@ model ReportedMessage {
   message_id  Int          @unique
   created_at  DateTime     @default(now())
   updated_at  DateTime     @updatedAt
+}
+
+model NftDefinition {
+  id         String       @id
+  definition String
+  creator    TelegramUser @relation("nft_meanings", fields: [creator_id], references: [id])
+  creator_id Int
+  created_at DateTime     @default(now())
+  updated_at DateTime     @updatedAt
+  uses       Int          @default(0)
 }
 
 enum Pronoun {
