@@ -1,0 +1,14 @@
+{
+  "name": "ooctechquest-scripts",
+  "version": "0.0.0",
+  "description": "",
+  "main": "optimize-quotes.js",
+  "scripts": {
+    "optmize-images": "node ./optimize-quotes.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "compress-images": "^2.0.5"
+  }
+}
