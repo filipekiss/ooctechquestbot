@@ -1,57 +1,29 @@
 import { Composer, InputFile } from "grammy";
 import { OocContext } from "../config";
-import { DB_FOLDER, DEFAULT_ASSETS_FOLDER } from "../config/environment";
-import Keyv from "keyv";
+import { DEFAULT_ASSETS_FOLDER } from "../config/environment";
 import { ReplyMessage, User } from "@grammyjs/types";
 import { MessageX } from "@grammyjs/hydrate/out/data/message";
 import { replyToSender } from "../utils/message";
 import { withNext } from "../utils/middleware";
 import {
-  addNftRecord,
   createNftDefinition,
-  generateIdFromDefinition,
   getAllNftDefinitions,
   getNftDefinition,
   getRandomNftDefinition,
   incrementUsesCountById,
+  META_NFT_IMAGE_COUNT,
+  META_NFT_TOTAL_USES_COUNT,
 } from "../data/nft";
-import { getTelegramUserDetails } from "../data/user";
-
-const NFT_Meanings = [
-  "Não Faço Trabalho",
-  "Não Fode, Truta",
-  "Naruto Fazendo Taijutsu",
-  "Nem Fudendo, Tapado",
-  "Nove Filas de Tatu",
-  "Novos Filhos de Thanos",
-  "Não Funciona o Testículo",
-  "Necessidade de Fazer Terapia",
-  "Nunca Fiz Tatuagem",
-  "Never Felt Titties",
-  "Need Female Touch",
-  "Não Fumo Tabaco",
-  "Neerlandês Fazendo Tulipa",
-];
-
-async function getOldNftMeanings() {
-  const definitionListStr = (await nftDB.get(
-    NFT_SCHEMA.NFT_MESSAGES
-  )) as string;
-  const definitionList = definitionListStr ? definitionListStr.split("\n") : [];
-  const allMeanings = new Set([...NFT_Meanings, ...definitionList]);
-  return {
-    random: () =>
-      [...allMeanings][Math.floor(Math.random() * allMeanings.size)],
-    all: () => [...allMeanings],
-  };
-}
+import { getMetaValue, incrementMetaCount, setMetaValue } from "../data/meta";
 
 export const nft = new Composer<OocContext>();
 nft.hears(
   /nft/i,
   withNext(async (ctx) => {
+    await incrementMetaCount(META_NFT_TOTAL_USES_COUNT);
     const shouldSendImage = Math.floor(Math.random() * 10) + 1;
     if (shouldSendImage > 9) {
+      await incrementMetaCount(META_NFT_IMAGE_COUNT);
       ctx.replyWithChatAction("upload_photo");
       await ctx.replyWithPhoto(
         new InputFile(`${DEFAULT_ASSETS_FOLDER}/nft.jpg`),
@@ -76,12 +48,6 @@ type NftDefinition = {
   t: string;
   message: ReplyMessage;
 };
-
-const NFT_SCHEMA = {
-  NFT_MESSAGES: "nft_messages",
-};
-
-const nftDB = new Keyv(`sqlite://${DB_FOLDER}/nft.sqlite`);
 
 const isValidMeaning = (x: string, startWith: string) =>
   x.toLowerCase().startsWith(startWith);
@@ -177,48 +143,6 @@ nft.command(
     deleteMessage(receivedMessage, timeout);
     deleteMessage(botReply, timeout);
     return;
-  })
-);
-
-nft.command(
-  "migratenft",
-  withNext(async (ctx) => {
-    const [nftMeaning] = await getRandomNftDefinition();
-    if (nftMeaning) {
-      return;
-    }
-    const allMeanings = (await getOldNftMeanings()).all();
-    const fullMeanings = (
-      await Promise.all(
-        allMeanings.map(
-          async (meaning) => (await nftDB.get(meaning)) || meaning
-        )
-      )
-    ).filter((x) => Boolean(x));
-    await Promise.all(
-      fullMeanings.map(async (meaning) => {
-        if (meaning.message) {
-          const created_at = new Date(meaning.message.date * 1000);
-          const id = generateIdFromDefinition(joinNft(meaning));
-          await addNftRecord({
-            id,
-            created_at: created_at.toISOString(),
-            definition: joinNft(meaning),
-            creator: {
-              connectOrCreate: {
-                where: {
-                  telegram_id: meaning.message.from.id,
-                },
-                create: getTelegramUserDetails(meaning.message.from),
-              },
-            },
-          });
-          console.log(`Migrated ${joinNft(meaning)}`);
-          return;
-        }
-        await createNftDefinition(meaning, ctx.from as User);
-      })
-    );
   })
 );
 

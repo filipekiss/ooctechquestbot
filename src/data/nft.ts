@@ -6,6 +6,9 @@ import { NftDefinition, Prisma } from ".prisma/client";
 
 const NFT_NAMESPACE = "d69aab2c-d254-4955-9d4d-c91da93b4f36";
 
+export const META_NFT_IMAGE_COUNT = "NFT_META_IMAGE_COUNT";
+export const META_NFT_TOTAL_USES_COUNT = "NFT_TOTAL_USES_COUNT";
+
 export const getNftDefinition = (definition: string) => {
   const id = generateIdFromDefinition(definition);
   return dbClient.nftDefinition.findFirst({

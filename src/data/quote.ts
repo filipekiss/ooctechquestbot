@@ -3,6 +3,8 @@ import { Message, User } from "@grammyjs/types";
 import { dbClient, JsonObject } from "./client";
 import { getTelegramUserDetails, getUserById } from "./user";
 
+export const META_QUOTE_TOTAL_USES = "QUOTE_TOTAL_USES";
+
 export const getQuoteByKey = (key: string) => {
   return dbClient.quote.findUnique({
     where: {

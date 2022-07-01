@@ -1,6 +1,7 @@
 import { User } from "@grammyjs/types";
 import { Composer } from "grammy";
 import { OocContext } from "../config";
+import { incrementMetaCount } from "../data/meta";
 import {
   createQuote,
   getAllQuoteKeys,
@@ -8,6 +9,7 @@ import {
   getQuoteByMessageId,
   getQuoteStats,
   incrementUsesCountById,
+  META_QUOTE_TOTAL_USES,
   removeQuoteByKey,
 } from "../data/quote";
 import { BotModule, mdEscape } from "../main";
@@ -252,6 +254,7 @@ quote.command("quote", async (ctx, next) => {
         await next();
         return;
       }
+      await incrementMetaCount(META_QUOTE_TOTAL_USES);
       await incrementUsesCountById(existingQuote.id);
       ctx.api.forwardMessage(
         ctx.chat.id,
