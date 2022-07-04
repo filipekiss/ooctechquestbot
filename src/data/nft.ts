@@ -1,8 +1,8 @@
 import { User } from "@grammyjs/types";
 import { dbClient } from "./client";
-import { getTelegramUserDetails } from "./user";
+import { getTelegramUserDetails, getUserById } from "./user";
 import { v5 as uuidv5 } from "uuid";
-import { NftDefinition, Prisma } from ".prisma/client";
+import { NftDefinition, Prisma, TelegramUser } from ".prisma/client";
 
 const NFT_NAMESPACE = "d69aab2c-d254-4955-9d4d-c91da93b4f36";
 
@@ -72,4 +72,52 @@ export const incrementUsesCountById = (id: string) => {
       },
     },
   });
+};
+
+export const getNftStats = async () => {
+  const totalNftDefinitions = await dbClient.nftDefinition.count();
+  const topThreeUsedDefinitions = await dbClient.nftDefinition.findMany({
+    select: {
+      definition: true,
+      uses: true,
+    },
+    orderBy: {
+      uses: "desc",
+    },
+    where: {
+      uses: {
+        gt: 0,
+      },
+    },
+    take: 3,
+  });
+  const [topUser] = await Promise.all(
+    (
+      await dbClient.nftDefinition.groupBy({
+        by: ["creator_id"],
+        take: 1,
+        _count: {
+          id: true,
+        },
+        orderBy: {
+          _count: {
+            id: "desc",
+          },
+        },
+      })
+    ).map(async (definition) => {
+      const creator = (await getUserById(
+        definition.creator_id
+      )) as TelegramUser;
+      return {
+        ...definition,
+        creator,
+      };
+    })
+  );
+  return {
+    totalNftDefinitions,
+    topThreeUsedDefinitions,
+    topUser,
+  };
 };

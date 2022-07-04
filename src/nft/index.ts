@@ -3,18 +3,21 @@ import { OocContext } from "../config";
 import { DEFAULT_ASSETS_FOLDER } from "../config/environment";
 import { ReplyMessage, User } from "@grammyjs/types";
 import { MessageX } from "@grammyjs/hydrate/out/data/message";
-import { replyToSender } from "../utils/message";
+import { replyToSender, sendAsMarkdown } from "../utils/message";
 import { withNext } from "../utils/middleware";
 import {
   createNftDefinition,
   getAllNftDefinitions,
   getNftDefinition,
+  getNftStats,
   getRandomNftDefinition,
   incrementUsesCountById,
   META_NFT_IMAGE_COUNT,
   META_NFT_TOTAL_USES_COUNT,
 } from "../data/nft";
 import { getMetaValue, incrementMetaCount, setMetaValue } from "../data/meta";
+import { getUsernameOrFullname } from "../utils/user";
+import { mdEscape } from "../main";
 
 export const nft = new Composer<OocContext>();
 nft.hears(
@@ -104,6 +107,40 @@ async function sendNftList(ctx: OocContext) {
   return;
 }
 
+async function sendNftStats(ctx: OocContext) {
+  const nftStats = await getNftStats();
+
+  const output: string[] = [];
+  output.push(`*Quantidade de definições*: ${nftStats.totalNftDefinitions}`);
+  const { topUser } = nftStats;
+  if (topUser) {
+    output.push(
+      `*Usuário que mais criou definições*: ${getUsernameOrFullname(
+        topUser.creator
+      )}`
+    );
+  }
+  const { topThreeUsedDefinitions } = nftStats;
+  output.push(
+    `*Top ${
+      topThreeUsedDefinitions.length
+    } definições mais usadas*\n${topThreeUsedDefinitions
+      .map(
+        (definition) => ` • \`${definition.definition}\` - ${definition.uses}`
+      )
+      .join("\n")}`
+  );
+  const botReply = await ctx.reply(mdEscape(output.join("\n")), {
+    ...sendAsMarkdown(),
+    ...replyToSender(ctx),
+  });
+  const receivedMessage = ctx.message!;
+  const timeout = 60000;
+  deleteMessage(receivedMessage, timeout);
+  deleteMessage(botReply, timeout);
+  return;
+}
+
 function deleteMessage(message: MessageX, timeout: number) {
   setTimeout(async () => {
     try {
@@ -120,6 +157,9 @@ nft.command(
     const action = ctx.match as string;
     if (action === "list") {
       return sendNftList(ctx);
+    }
+    if (action === "stats") {
+      return sendNftStats(ctx);
     }
     const [n, f, t] = action.split(" ");
     if (!n || !f || !t || !isValidNftMeaning(n, f, t))
