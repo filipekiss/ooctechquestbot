@@ -3,7 +3,7 @@ import { OocContext } from "../config";
 import { DEFAULT_ASSETS_FOLDER } from "../config/environment";
 import { ReplyMessage, User } from "@grammyjs/types";
 import { MessageX } from "@grammyjs/hydrate/out/data/message";
-import { replyToSender, sendAsMarkdown } from "../utils/message";
+import { deleteMessage, replyToSender, sendAsMarkdown } from "../utils/message";
 import { withNext } from "../utils/middleware";
 import {
   createNftDefinition,
@@ -90,8 +90,7 @@ async function replyInvalidMeaning(ctx: OocContext) {
 
 async function sendNftList(ctx: OocContext) {
   const allMeanings = await getAllNftDefinitions();
-  const receivedMessage = ctx.message!;
-  const botReply = await ctx.reply(
+  await ctx.reply(
     `Significados de NFT: \n${allMeanings
       .map((definition) => {
         return definition.definition;
@@ -101,9 +100,6 @@ async function sendNftList(ctx: OocContext) {
       parse_mode: "MarkdownV2",
     }
   );
-  const timeout = 60000;
-  deleteMessage(receivedMessage, timeout);
-  deleteMessage(botReply, timeout);
   return;
 }
 
@@ -130,25 +126,11 @@ async function sendNftStats(ctx: OocContext) {
       )
       .join("\n")}`
   );
-  const botReply = await ctx.reply(mdEscape(output.join("\n")), {
+  await ctx.reply(mdEscape(output.join("\n")), {
     ...sendAsMarkdown(),
     ...replyToSender(ctx),
   });
-  const receivedMessage = ctx.message!;
-  const timeout = 60000;
-  deleteMessage(receivedMessage, timeout);
-  deleteMessage(botReply, timeout);
   return;
-}
-
-function deleteMessage(message: MessageX, timeout: number) {
-  setTimeout(async () => {
-    try {
-      await message.delete();
-    } catch {
-      console.warn("Unable to delete message. Skipping…");
-    }
-  }, timeout);
 }
 
 nft.command(
@@ -176,12 +158,9 @@ nft.command(
     }
     await createNftDefinition(joinNft(definition), ctx.from as User);
     const receivedMessage = ctx.message!;
-    const botReply = await ctx.reply(`Definição adicionada`, {
+    await ctx.reply(`Definição adicionada`, {
       reply_to_message_id: receivedMessage.message_id,
     });
-    const timeout = 15000;
-    deleteMessage(receivedMessage, timeout);
-    deleteMessage(botReply, timeout);
     return;
   })
 );

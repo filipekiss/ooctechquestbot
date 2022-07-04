@@ -9,17 +9,9 @@ export const revolta = new Composer<OocContext>();
 revolta.command(
   ["revolta", "porra"],
   withNext(async (context: OocContext) => {
-    const receivedMessage = context.update.message;
     await context.reply("(╯°□°）╯︵ ┻━┻", {
       ...replyToReplyOrToSender(context),
     });
-    if (receivedMessage?.reply_to_message) {
-      try {
-        await receivedMessage.delete();
-      } catch {
-        console.error("Unable to delete message. Skipping...");
-      }
-    }
   })
 );
 

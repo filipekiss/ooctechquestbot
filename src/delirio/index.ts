@@ -8,20 +8,12 @@ import { withNext } from "../utils/middleware";
 export const delirio = new Composer<OocContext>();
 
 export const sendDelirio = withNext(async (context: OocContext) => {
-  const receivedMessage = context.update.message;
   await context.replyWithPhoto(
     new InputFile(`${DEFAULT_ASSETS_FOLDER}/delirios.jpg`),
     {
       ...replyToReplyOrToSender(context),
     }
   );
-  if (receivedMessage?.reply_to_message) {
-    try {
-      await receivedMessage.delete();
-    } catch {
-      console.error("Unable to delete message. Skipping...");
-    }
-  }
 });
 
 delirio.command(["delirio", "delirios"], sendDelirio);

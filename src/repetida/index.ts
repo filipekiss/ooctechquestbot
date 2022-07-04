@@ -23,13 +23,6 @@ const sendAudio = async (ctx: OocContext) => {
   await ctx.replyWithAudio(fileId, {
     ...replyToReply(ctx),
   });
-  if (!isTrigger) {
-    try {
-      await receivedMessage?.delete();
-    } catch {
-      console.error("Unable to delete message. Skipping...");
-    }
-  }
 };
 repetida.hears(/boca de leite/i, withNext(sendAudio));
 repetida.command("repetida", withNext(sendAudio));

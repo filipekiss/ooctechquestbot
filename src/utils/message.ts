@@ -1,3 +1,4 @@
+import { MessageX } from "@grammyjs/hydrate/out/data/message";
 import { OocContext } from "../config";
 
 export const replyToSender = (context: OocContext) => {
@@ -34,4 +35,14 @@ export const removeKeyboard = (): {
       remove_keyboard: true,
     },
   };
+};
+
+export const deleteMessage = async (message: MessageX, timeout: number) => {
+  setTimeout(async () => {
+    try {
+      await message.delete();
+    } catch {
+      console.warn("Unable to delete message. Skipping…");
+    }
+  }, timeout);
 };

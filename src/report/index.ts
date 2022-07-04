@@ -62,14 +62,6 @@ async function replyAlreadyReported(ctx: OocContext) {
   const botReply = await ctx.reply("Essa mensagem já foi reportada.", {
     ...replyToSender(ctx),
   });
-  setTimeout(async () => {
-    try {
-      await receivedMessage.delete();
-      await botReply.delete();
-    } catch {
-      console.warn("Unable to delete message. Skipping…");
-    }
-  }, 15000);
   return;
 }
 
@@ -122,13 +114,7 @@ report.filter(isReply).command(
       console.log(reportedMessage);
       await reportMessage(receivedMessage);
 
-      return sendReport(ctx, true).then(async () => {
-        try {
-          await receivedMessage.delete();
-        } catch {
-          console.error("Unable to delete message. Skipping...");
-        }
-      });
+      return sendReport(ctx, true);
     }
   })
 );
