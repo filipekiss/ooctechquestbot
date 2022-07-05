@@ -64,6 +64,9 @@ model TelegramUser {
   reports      ReportedMessage[] @relation("reporter")
   reported     ReportedMessage[] @relation("reported")
   nft_meanings NftDefinition[]   @relation("nft_meanings")
+  BanReason    BanReason[]       @relation("ban_reason")
+  bannings     Ban[]             @relation("bannings")
+  banned       Ban[]             @relation("banned")
 }
 
 model Quote {
@@ -111,6 +114,30 @@ model NftDefinition {
   created_at DateTime     @default(now())
   updated_at DateTime     @updatedAt
   uses       Int          @default(0)
+}
+
+model BanReason {
+  id         String       @id
+  reason     String
+  creator    TelegramUser @relation("ban_reason", fields: [creator_id], references: [id])
+  creator_id Int
+  created_at DateTime     @default(now())
+  updated_at DateTime     @updatedAt
+  uses       Int          @default(0)
+  ban        Ban[]        @relation("reason")
+  is_active  Boolean      @default(true)
+}
+
+model Ban {
+  id          Int          @id @default(autoincrement())
+  reason      BanReason    @relation("reason", fields: [reason_id], references: [id])
+  reason_id   String
+  reporter    TelegramUser @relation("bannings", fields: [reporter_id], references: [id])
+  reporter_id Int
+  reported    TelegramUser @relation("banned", fields: [reported_id], references: [id])
+  reported_id Int
+  created_at  DateTime     @default(now())
+  updated_at  DateTime     @updatedAt
 }
 
 enum Pronoun {

@@ -1,4 +1,5 @@
 import { MessageX } from "@grammyjs/hydrate/out/data/message";
+import { Message, User } from "@grammyjs/types";
 import { OocContext } from "../config";
 
 export const replyToSender = (context: OocContext) => {
@@ -45,4 +46,14 @@ export const deleteMessage = async (message: MessageX, timeout: number) => {
       console.warn("Unable to delete message. Skipping…");
     }
   }, timeout);
+};
+
+export const getMessageAuthor = (message: Message) => {
+  return message.forward_from?.id
+    ? message.forward_from
+    : (message.from as User);
+};
+
+export const getMessageDate = (message: Message) => {
+  return message.forward_date ? message.forward_date : message.date;
 };

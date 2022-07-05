@@ -1,11 +1,13 @@
 import { Composer } from "grammy";
 import { BotModule } from "../main";
 import { OocContext } from "../config";
-import { getBanReason } from "./reason";
 import { replyToReply } from "../utils/message";
 import { withNext } from "../utils/middleware";
 import { Pronoun } from ".prisma/client";
 import { getUserPronounByTelegramId } from "../data/user";
+import { filterBanReason, getRandomBanReason } from "../data/ban-reason";
+import { banUser } from "../data/ban";
+import { User } from "@grammyjs/types";
 
 export const ban = new Composer<OocContext>();
 
@@ -24,14 +26,15 @@ ban.command(
     const receivedMessage = context.update.message;
     const banningMessage = receivedMessage?.reply_to_message;
     if (banningMessage) {
+      const bannedPerson = banningMessage.from;
+      if (!bannedPerson) {
+        return;
+      }
       const query = context.match as string;
-      const randomReason = (await getBanReason()).random();
-      let banReason = randomReason;
+      const randomReason = await getRandomBanReason();
+      let [banReason] = randomReason;
       if (query) {
-        const allReasons = (await getBanReason()).all();
-        const foundReason = allReasons.filter((reason) => {
-          return reason.toLowerCase().indexOf(query) > -1;
-        });
+        const foundReason = await filterBanReason(query);
         if (foundReason.length > 0) {
           const random = [...foundReason][
             Math.floor(Math.random() * foundReason.length)
@@ -39,20 +42,19 @@ ban.command(
           banReason = random;
         }
       }
-      const bannedPerson = banningMessage.from;
-      if (!bannedPerson) {
-        return;
-      }
       const bannedPersonName = bannedPerson.first_name;
       const bannedPersonPronoun = (await getUserPronounByTelegramId(
         bannedPerson.id
       )) as Pronoun;
-      console.log(bannedPersonPronoun);
       const bannedMessageFormat =
         banMessageFormat[bannedPersonPronoun] || banMessageFormat[Pronoun.THEY];
-      await context.reply(bannedMessageFormat(bannedPersonName, banReason), {
-        ...replyToReply(context),
-      });
+      await banUser(bannedPerson, receivedMessage.from as User, banReason);
+      await context.reply(
+        bannedMessageFormat(bannedPersonName, banReason.reason),
+        {
+          ...replyToReply(context),
+        }
+      );
       return;
     }
   })

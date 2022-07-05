@@ -1,4 +1,4 @@
-import { Pronoun, TelegramUser } from ".prisma/client";
+import { Pronoun } from ".prisma/client";
 import { User } from "@grammyjs/types";
 import { dbClient } from "./client";
 

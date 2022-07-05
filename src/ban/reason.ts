@@ -1,56 +1,27 @@
 import { OocContext } from "../config";
 import { Composer } from "grammy";
-import Keyv from "keyv";
 import { BotModule } from "../main";
-import { DB_FOLDER } from "../config/environment";
-import { replyToSender } from "../utils/message";
+import {
+  getMessageAuthor,
+  getMessageDate,
+  replyToSender,
+} from "../utils/message";
 import { isAdmin } from "../utils/user";
+import {
+  addBanReasonRecord,
+  deleteBanReason,
+  disableReason,
+  enableReason,
+  generateIdFromReason,
+  getAllBanReasons,
+  getBanReasonFromReason,
+} from "../data/ban-reason";
+import { Message } from "@grammyjs/types";
+import { getTelegramUserDetails } from "../data/user";
 
 export const BANREASON_SCHEMA = {
   BAN_REASONS: "banreasons",
 };
-
-export async function getBanReason() {
-  const banReasonsStr = (await banDB.get(
-    BANREASON_SCHEMA.BAN_REASONS
-  )) as string;
-  const allReasons = banReasonsStr ? banReasonsStr.split("\n") : [];
-  return {
-    random: () =>
-      [...allReasons][Math.floor(Math.random() * allReasons.length)],
-    all: () => [...allReasons],
-  };
-}
-
-const banDB = new Keyv(`sqlite://${DB_FOLDER}/ban.sqlite`);
-
-function makeDbKey(phrase: string) {
-  return phrase.replace(/[\s]/gi, "_").toLowerCase();
-}
-
-async function checkExistingReason(reasonKey: string) {
-  return Boolean(await banDB.get(reasonKey));
-}
-
-async function addBanReason(reasonKey: string, banReason: string) {
-  const allReasons = (await getBanReason()).all();
-  const newReasons = [...allReasons, banReason];
-  await banDB.set(BANREASON_SCHEMA.BAN_REASONS, newReasons.join("\n"));
-  await banDB.set(reasonKey, banReason);
-}
-
-async function removeBanReason(reasonKey: string) {
-  const allReasons = (await getBanReason()).all();
-  const newReasons = allReasons.filter((reason) => {
-    console.log({ reason });
-    console.log({ reasonKeyGen: makeDbKey(reason) });
-    console.log({ reasonKey });
-    return makeDbKey(reason) !== reasonKey;
-  });
-  console.log(newReasons);
-  await banDB.set(BANREASON_SCHEMA.BAN_REASONS, newReasons.join("\n"));
-  await banDB.delete(reasonKey);
-}
 
 async function replyAlreadyAdded(ctx: OocContext) {
   const reason = ctx.match as string;
@@ -64,10 +35,14 @@ banReason.command("banreason", async (ctx: OocContext, next) => {
   const reason = ctx.match as string;
   if (!reason || reason === "list") {
     ctx.replyWithChatAction("typing");
-    const reasonList = (await getBanReason()).all();
-    ctx.reply(reasonList.join("\n"), {
-      ...replyToSender(ctx),
-    });
+    const reasons = await getAllBanReasons();
+    if (reasons.length > 0) {
+      ctx.reply(reasons.map((reason) => reason.reason).join("\n"), {
+        ...replyToSender(ctx),
+      });
+    } else {
+      ctx.reply("Ainda não tenho nenhuma razão pra banir alguém");
+    }
     await next();
     return;
   }
@@ -84,10 +59,9 @@ banReason.command("banreason", async (ctx: OocContext, next) => {
     const [, ...reasonParts] = reason.split(" ");
 
     const reasonToRemove = reasonParts.join(" ");
-    const reasonKey = makeDbKey(reasonToRemove);
-    const reasonExists = await checkExistingReason(reasonKey);
-    if (reasonExists) {
-      await removeBanReason(reasonKey);
+    const reasonExists = await getBanReasonFromReason(reasonToRemove);
+    if (reasonExists && reasonExists.is_active) {
+      await disableReason(reasonToRemove);
       ctx.reply(
         `Pronto! ${reasonToRemove} não é mais uma razão pra ser banido`,
         {
@@ -105,18 +79,44 @@ banReason.command("banreason", async (ctx: OocContext, next) => {
     await next();
     return;
   }
-  const reasonExists = await checkExistingReason(makeDbKey(reason));
+  const reasonExists = await getBanReasonFromReason(reason);
   if (reasonExists) {
-    await replyAlreadyAdded(ctx);
+    if (reasonExists.is_active) {
+      await replyAlreadyAdded(ctx);
+      await next();
+      return;
+    }
+    await enableReason(reason);
+    await replyReasonEnabled(ctx, reason);
     await next();
     return;
   }
-  await addBanReason(makeDbKey(reason), reason);
-  ctx.reply(`Pronto! ${reason} é uma nova razão pra ser banido`, {
-    ...replyToSender(ctx),
+  const creator = getMessageAuthor(ctx.message as Message);
+  const date = getMessageDate(ctx.message as Message);
+  const id = generateIdFromReason(reason);
+  const created_at = new Date(date * 1000);
+  await addBanReasonRecord({
+    id,
+    reason,
+    created_at: created_at.toISOString(),
+    creator: {
+      connectOrCreate: {
+        where: {
+          telegram_id: creator.id,
+        },
+        create: getTelegramUserDetails(creator),
+      },
+    },
   });
+  await replyReasonEnabled(ctx, reason);
   await next();
 });
+
+const replyReasonEnabled = async (ctx: OocContext, reason: string) => {
+  return ctx.reply(`Pronto! ${reason} é uma nova razão pra ser banido`, {
+    ...replyToSender(ctx),
+  });
+};
 
 export const banReasonModule: BotModule = {
   command: "banreason",
