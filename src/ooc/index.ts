@@ -1,41 +1,22 @@
-import { ChatFromGetChat } from "@grammyjs/types";
+import { User } from "@grammyjs/types";
 import { Composer, InputFile } from "grammy";
-import Keyv from "keyv";
+import { basename, parse } from "path";
 import { OocContext } from "../config";
+import { ARCHIVE_CHANNEL_ID, BOT_USERNAME } from "../config/environment";
 import {
-  ARCHIVE_CHANNEL_ID,
-  BOT_USERNAME,
-  DB_FOLDER,
-} from "../config/environment";
+  addImageToOoc,
+  createOoc,
+  getOocByMessageId,
+  getOocStats,
+} from "../data/ooc";
+import { mdEscape } from "../main";
 import { parseArguments } from "../telegram/messages";
-import { replyToSender } from "../utils/message";
+import { replyToSender, sendAsMarkdown } from "../utils/message";
+import { getUsernameOrFullname } from "../utils/user";
 import { generateQuoteImage } from "./generate-quote-image";
 import { removeSurroundingQuotes } from "./remove-surrounding-quotes";
 
 export const ooc = new Composer<OocContext>();
-
-const oocDB = new Keyv(`sqlite://${DB_FOLDER}/ooc.sqlite`);
-
-const STEALTH_ACTION = "stealth";
-
-const whitelistedGroups = [-1001699419971];
-
-export async function removeFromGroup(
-  chatInfo: ChatFromGetChat,
-  ctx: OocContext
-) {
-  if (whitelistedGroups.includes(chatInfo.id)) {
-    console.log(`Keep in group`);
-  } else {
-    try {
-      console.log(`Remove from group`);
-      await ctx.reply("This group is not authorized to use this bot. Bye :)");
-      await ctx.api.leaveChat(chatInfo.id);
-    } catch {
-      console.log(`Unable to leave group. Skipping…`);
-    }
-  }
-}
 
 async function replyAlreadyQuoted(ctx: OocContext) {
   const receivedMessage = ctx.message!;
@@ -54,6 +35,29 @@ async function replyAlreadyQuoted(ctx: OocContext) {
 }
 
 const botUsername = BOT_USERNAME.toLowerCase();
+ooc.command("oocstats", async (ctx, next) => {
+  const stats = await getOocStats();
+  ctx.replyWithChatAction("typing");
+  const output: string[] = [];
+  output.push(`*Mensagens encaminhadas*: ${stats.totalOoc}`);
+  const { topOocUser } = stats;
+  output.push(
+    `*Usuário mais encaminhado*: ${getUsernameOrFullname(topOocUser.author)}`
+  );
+  const { topOocAuthor } = stats;
+  output.push(
+    `*Usuário que mais encaminhou mensagens*: ${getUsernameOrFullname(
+      topOocAuthor.author
+    )}`
+  );
+  output.push(`_Estatísticas contadas a partir de 6 de Julho de 2022_`);
+  ctx.reply(mdEscape(output.join("\n")), {
+    ...sendAsMarkdown(),
+    ...replyToSender(ctx),
+  });
+  await next();
+  return;
+});
 ooc.on("message:entities:mention", async (ctx, next) => {
   const receivedMessage = ctx.update.message;
   const isPureMention = receivedMessage.text
@@ -65,29 +69,18 @@ ooc.on("message:entities:mention", async (ctx, next) => {
   if (isPureMention && receivedMessage && messageToQuote) {
     console.log("The message was a reply, forwarding to archive channel");
 
-    if (await oocDB.get(messageToQuote.message_id.toString())) {
+    if (await getOocByMessageId(messageToQuote.message_id)) {
       replyAlreadyQuoted(ctx);
       await next();
       return;
     }
-    const [action] = parseArguments(receivedMessage.text!);
-    if (
-      action === STEALTH_ACTION &&
-      receivedMessage.from?.username === "filipekiss"
-    ) {
-      try {
-        await receivedMessage.delete();
-      } catch (e) {
-        console.log("unable to delete message");
-      }
-    }
+    const [query] = parseArguments(receivedMessage.text!);
     try {
       await ctx.api.forwardMessage(
         ARCHIVE_CHANNEL_ID,
         receivedMessage.chat.id,
         messageToQuote.message_id
       );
-      await oocDB.set(messageToQuote.message_id.toString(), messageToQuote);
     } catch (e) {
       console.log("Message not found, not forwarded");
     } finally {
@@ -99,12 +92,29 @@ ooc.on("message:entities:mention", async (ctx, next) => {
           text: quoteText,
           author:
             messageToQuote.from!.username ?? messageToQuote.from!.first_name,
-          query: action,
+          query: query,
         });
         if (generatedImage) {
-          ctx.api.sendPhoto(ARCHIVE_CHANNEL_ID, new InputFile(generatedImage));
+          await ctx.api.sendPhoto(
+            ARCHIVE_CHANNEL_ID,
+            new InputFile(generatedImage.canvas)
+          );
+          const newOoc = await createOoc(
+            messageToQuote,
+            messageToQuote.from as User,
+            receivedMessage.from as User
+          );
+          const { name: imageName } = parse(generatedImage.image);
+          await addImageToOoc(newOoc, imageName);
         }
+        await next();
+        return;
       }
+      await createOoc(
+        messageToQuote,
+        messageToQuote.from as User,
+        receivedMessage.from as User
+      );
     }
   }
   await next();

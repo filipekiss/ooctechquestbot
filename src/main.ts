@@ -56,7 +56,7 @@ const addModuleToBot = (module: BotModule) => {
 };
 
 export function mdEscape(text: string): string {
-  return text.replace(/[[\]()~>#+\-=|{}.!\\_]/g, "\\$&");
+  return text.replace(/[[\]()~>#+\-=|{}.!\\]/g, "\\$&");
 }
 
 const help = (commandsRegister: any) => {

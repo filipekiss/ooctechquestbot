@@ -67,6 +67,8 @@ model TelegramUser {
   BanReason    BanReason[]       @relation("ban_reason")
   bannings     Ban[]             @relation("bannings")
   banned       Ban[]             @relation("banned")
+  ooced        Ooc[]             @relation("ooced")
+  ooc          Ooc[]             @relation("ooc")
 }
 
 model Quote {
@@ -138,6 +140,18 @@ model Ban {
   reported_id Int
   created_at  DateTime     @default(now())
   updated_at  DateTime     @updatedAt
+}
+
+model Ooc {
+  id         Int          @id @default(autoincrement())
+  message_id Int          @unique
+  created_at DateTime     @default(now())
+  updated_at DateTime     @updatedAt
+  quoted     TelegramUser @relation("ooced", fields: [quoted_id], references: [id])
+  quoted_id  Int
+  creator    TelegramUser @relation("ooc", fields: [creator_id], references: [id])
+  creator_id Int
+  image      String?
 }
 
 enum Pronoun {

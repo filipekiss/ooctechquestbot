@@ -46,6 +46,17 @@ async function replyAlreadyQuoted(ctx: OocContext, quoteKey: string) {
   return;
 }
 
+const defaultReservedWords = [
+  "add",
+  "del",
+  "delete",
+  "remove",
+  "list",
+  "stats",
+  "lazer",
+  "oocstats",
+];
+
 quote.command("quote", async (ctx, next) => {
   if (!ctx.message?.text) {
     await next();
@@ -56,15 +67,9 @@ quote.command("quote", async (ctx, next) => {
 
   const commands = await ctx.api.getMyCommands();
   const reservedWords = [
-    "add",
-    "del",
-    "delete",
-    "remove",
-    "list",
-    "stats",
+    ...defaultReservedWords,
     ...commands.map((command) => command.command),
   ];
-
   if (reservedWords.includes(key)) {
     ctx.reply(`Você não pode usar "${key}" como uma chave de quote`, {
       ...replyToSender(ctx),
@@ -277,7 +282,10 @@ quote.on(":entities:bot_command", async (ctx, next) => {
   const commandIsRegistered = commands.find(
     (command) => `/${command.command}` === currentCommand
   );
-  if (commandIsRegistered) {
+  if (
+    commandIsRegistered ||
+    defaultReservedWords.includes(currentCommand.slice(1))
+  ) {
     await next();
     return;
   }

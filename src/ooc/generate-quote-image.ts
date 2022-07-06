@@ -87,5 +87,8 @@ export const generateQuoteImage = async (quote: QuoteDetails) => {
   const { width: textSize } = getTextSize(quote.author, 48);
   ctx.fillText(quote.author, 1500 - textSize, 600);
 
-  return canvas.toBuffer();
+  return {
+    image: quoteTemplateLocation,
+    canvas: canvas.toBuffer(),
+  };
 };
