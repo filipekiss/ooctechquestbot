@@ -40,15 +40,22 @@ const referralSites: ReferralConfig[] = [
     pattern: /(https:\/\/(?:[a-z0-9].*\.)?amzn.to\/.*)(?:\?.*)?/gm,
     transform: async (matches) => {
       const [shortUrl] = matches;
-      const { redirectUrls } = await got.get(shortUrl);
-      const amazon = referralSites.find((config) => config.store === "amazon");
-      const [productUrl] = redirectUrls;
-      const expandedMatches = amazon?.pattern.exec(productUrl);
-      if (expandedMatches) {
-        const newUrl = amazon?.transform(expandedMatches);
-        return newUrl ? newUrl : null;
+      try {
+        const { redirectUrls } = await got.get(shortUrl);
+        const amazon = referralSites.find(
+          (config) => config.store === "amazon"
+        );
+        const [productUrl] = redirectUrls;
+        const expandedMatches = amazon?.pattern.exec(productUrl);
+        if (expandedMatches) {
+          const newUrl = amazon?.transform(expandedMatches);
+          return newUrl ? newUrl : null;
+        }
+      } catch {
+        console.log("Error expanding link");
+      } finally {
+        return null;
       }
-      return null;
     },
   },
   {
@@ -57,17 +64,22 @@ const referralSites: ReferralConfig[] = [
     pattern: /(https:\/\/)a.co\/[a-z]\/.*/gm,
     transform: async (matches) => {
       const [shortUrl] = matches;
-      const { redirectUrls } = await got.get(shortUrl);
-      const amazon = referralSites.find(
-        (config) => config.store === "amazonref"
-      );
-      const [productUrl] = redirectUrls;
-      const expandedMatches = amazon?.pattern.exec(productUrl);
-      if (expandedMatches) {
-        const newUrl = amazon?.transform(expandedMatches);
-        return newUrl ? newUrl : null;
+      try {
+        const { redirectUrls } = await got.get(shortUrl);
+        const amazon = referralSites.find(
+          (config) => config.store === "amazonref"
+        );
+        const [productUrl] = redirectUrls;
+        const expandedMatches = amazon?.pattern.exec(productUrl);
+        if (expandedMatches) {
+          const newUrl = amazon?.transform(expandedMatches);
+          return newUrl ? newUrl : null;
+        }
+      } catch {
+        console.log("Error expanding link");
+      } finally {
+        return null;
       }
-      return null;
     },
   },
   {
