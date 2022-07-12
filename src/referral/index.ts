@@ -13,6 +13,17 @@ type ReferralConfig = {
 };
 const referralSites: ReferralConfig[] = [
   {
+    store: "amazonref",
+    buttonText: "Ver na Amazon",
+    pattern:
+      /(https:\/\/(?:www.)?amazon.com.br)\/(?:[^\/]+\/)?([^\/]+)\/ref=(?:[^\/?]+)/gm,
+    transform: (matches) => {
+      const [, amazonUrl, id] = matches;
+      const affiliate = "?tag=mq08-20";
+      return `${amazonUrl}/dp/${id}${affiliate}`;
+    },
+  },
+  {
     store: "amazon",
     buttonText: "Ver na Amazon",
     pattern:
@@ -31,6 +42,25 @@ const referralSites: ReferralConfig[] = [
       const [shortUrl] = matches;
       const { redirectUrls } = await got.get(shortUrl);
       const amazon = referralSites.find((config) => config.store === "amazon");
+      const [productUrl] = redirectUrls;
+      const expandedMatches = amazon?.pattern.exec(productUrl);
+      if (expandedMatches) {
+        const newUrl = amazon?.transform(expandedMatches);
+        return newUrl ? newUrl : null;
+      }
+      return null;
+    },
+  },
+  {
+    buttonText: "Ver na Amazon",
+    store: "acod",
+    pattern: /(https:\/\/)a.co\/[a-z]\/.*/gm,
+    transform: async (matches) => {
+      const [shortUrl] = matches;
+      const { redirectUrls } = await got.get(shortUrl);
+      const amazon = referralSites.find(
+        (config) => config.store === "amazonref"
+      );
       const [productUrl] = redirectUrls;
       const expandedMatches = amazon?.pattern.exec(productUrl);
       if (expandedMatches) {
@@ -119,7 +149,5 @@ referral.hears(
         reply_markup: linkButton,
       });
     }
-    await next();
-    return;
   }
 );
