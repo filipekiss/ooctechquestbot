@@ -25,6 +25,7 @@ import { replyToSender } from "./utils/message";
 import { quoteModule } from "./quote";
 import { metadataMiddleware } from "./metadata";
 import { reportStatsModule } from "./report/stats";
+import { twitter } from "./twitter";
 
 setup();
 console.log("Starting...");
@@ -135,6 +136,7 @@ bot.use(salpicao);
 bot.use(referral);
 bot.use(wow);
 bot.use(acende);
+bot.use(twitter);
 bot.use(ooc);
 
 bot.start({
