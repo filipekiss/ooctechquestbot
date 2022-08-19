@@ -46,6 +46,23 @@ async function replyAlreadyQuoted(ctx: OocContext, quoteKey: string) {
   return;
 }
 
+async function quoteStats(key: string, ctx: OocContext) {
+  const quoteStats = await getQuoteByKey(key);
+  if (!quoteStats) {
+    await replyInexistingQuote(key, ctx);
+    return;
+  }
+  await ctx.reply(
+    `A quote foi adicionada por ${getUsernameOrFullname(
+      quoteStats.quoted_by
+    )} e é de autoria de ${getUsernameOrFullname(
+      quoteStats.author
+    )}. Ela foi usada ${quoteStats.uses} vez${
+      quoteStats.uses === 1 ? "" : "es"
+    }`
+  );
+}
+
 const defaultReservedWords = [
   "add",
   "del",
@@ -206,6 +223,12 @@ quote.command("quote", async (ctx, next) => {
       return;
     }
 
+    case "stat": {
+      await quoteStats(key, ctx);
+      await next();
+      return;
+    }
+
     case "delete":
     case "remove": {
       if (!key) {
@@ -236,17 +259,9 @@ quote.command("quote", async (ctx, next) => {
         await next();
         return;
       }
-      const deletedQuote = await removeQuoteByKey(key);
+      await removeQuoteByKey(key);
       await ctx.reply(`Pronto! Removi a quote ${key}`, replyToSender(ctx));
-      await ctx.reply(
-        `A quote foi adicionada por ${getUsernameOrFullname(
-          deletedQuote.quoted_by
-        )} e é de autoria de ${getUsernameOrFullname(
-          deletedQuote.author
-        )}. Ela foi usada ${deletedQuote.uses} vez${
-          deletedQuote.uses === 1 ? "" : "es"
-        } antes de ser removida`
-      );
+      await quoteStats(key, ctx);
       await next();
       return;
     }
