@@ -5,7 +5,7 @@ import { acende } from "./acende";
 import { badumtsModule } from "./badumts";
 import { OocContext, setup } from "./config";
 import { BOT_TOKEN } from "./config/environment";
-import { ooc } from "./ooc";
+import { oocModule } from "./ooc";
 import { reportModule } from "./report";
 import { nftModule } from "./nft";
 import { revoltaModule } from "./revolta";
@@ -116,18 +116,19 @@ const help = (commandsRegister: any) => {
 
 bot.use(hydrate());
 bot.use(metadataMiddleware);
-addModuleToBot(nftModule);
-addModuleToBot(revoltaModule);
-addModuleToBot(reportModule);
-addModuleToBot(reportStatsModule);
-addModuleToBot(keyboardModule);
-addModuleToBot(pronounModule);
-addModuleToBot(repetidaModule);
+addModuleToBot(oocModule);
+addModuleToBot(badumtsModule);
 addModuleToBot(banModule);
 addModuleToBot(banReasonModule);
 addModuleToBot(deliriosModule);
+addModuleToBot(keyboardModule);
+addModuleToBot(nftModule);
+addModuleToBot(pronounModule);
 addModuleToBot(quoteModule);
-addModuleToBot(badumtsModule);
+addModuleToBot(repetidaModule);
+addModuleToBot(reportModule);
+addModuleToBot(reportStatsModule);
+addModuleToBot(revoltaModule);
 bot.use(help(commandRegister));
 bot.use(lazer);
 bot.use(simpleReply);
@@ -137,18 +138,24 @@ bot.use(referral);
 bot.use(wow);
 bot.use(acende);
 bot.use(twitter);
-bot.use(ooc);
 
 bot.start({
   onStart: async (me) => {
     console.log(`Started...`);
-    console.log({ me });
+    console.log(`Bot username is ${me.username} (id: ${me.id})`);
 
     bot.api.config.use(hydrateFiles(bot.token));
     await bot.api.setMyCommands(
-      [...commandRegister.values()]
+      [
+        {
+          command: "ajuda",
+          shortDescription: "Lista os comandos do bot",
+        },
+        ...commandRegister.values(),
+      ]
         .filter((command) => command.command && command.shortDescription)
         .map((command) => {
+          console.log(`setting command ${command.command} `);
           return {
             command: command.command as string,
             description: command.shortDescription as string,
