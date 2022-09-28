@@ -116,7 +116,7 @@ ooc.command("oocstats", async (ctx, next) => {
   output.push(`*===*`);
   output.push(
     `Você foi citado ${userStats.timesQuoted._count.id} vez${
-      userStats.timesQuoted._count.id > 1 && "es"
+      userStats.timesQuoted._count.id > 1 ? "es" : ""
     } e criou ${userStats.timesCreated._count.id} citaç${
       userStats.timesCreated._count.id > 1 ? "ões" : "ão"
     }`
