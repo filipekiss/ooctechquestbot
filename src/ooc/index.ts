@@ -8,6 +8,7 @@ import {
   createOoc,
   getOocByMessageId,
   getOocStats,
+  getOocStatsForUser,
 } from "../data/ooc";
 import { BotModule, mdEscape } from "../main";
 import { parseArguments } from "../telegram/messages";
@@ -98,6 +99,7 @@ ooc.command("ooc", async (ctx, next) => {
 });
 ooc.command("oocstats", async (ctx, next) => {
   const stats = await getOocStats();
+  const userStats = await getOocStatsForUser(ctx.update.message?.from!);
   ctx.replyWithChatAction("typing");
   const output: string[] = [];
   output.push(`*Mensagens encaminhadas*: ${stats.totalOoc}`);
@@ -110,6 +112,14 @@ ooc.command("oocstats", async (ctx, next) => {
     `*Usuário que mais encaminhou mensagens*: ${getUsernameOrFullname(
       topOocAuthor.author
     )}`
+  );
+  output.push(`*===*`);
+  output.push(
+    `Você foi citado ${userStats.timesQuoted._count.id} vez${
+      userStats.timesQuoted._count.id > 1 && "es"
+    } e criou ${userStats.timesCreated._count.id} citaç${
+      userStats.timesCreated._count.id > 1 ? "ões" : "ão"
+    }`
   );
   output.push(`_Estatísticas contadas a partir de 6 de Julho de 2022_`);
   ctx.reply(mdEscape(output.join("\n")), {

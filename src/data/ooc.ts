@@ -1,7 +1,11 @@
 import { Ooc, TelegramUser } from ".prisma/client";
 import { Message, User } from "@grammyjs/types";
 import { dbClient, JsonObject } from "./client";
-import { getTelegramUserDetails, getUserById } from "./user";
+import {
+  getTelegramUserDetails,
+  getUserById,
+  upsertTelegramUser,
+} from "./user";
 
 export const getOocByMessageId = (message_id: number) => {
   return dbClient.ooc.findUnique({
@@ -101,5 +105,62 @@ export const getOocStats = async () => {
     totalOoc,
     topOocUser,
     topOocAuthor,
+  };
+};
+
+export const getOocStatsForUser = async (user: User) => {
+  const oocUser = await upsertTelegramUser(user);
+  const [timesQuoted] = await Promise.all(
+    (
+      await dbClient.ooc.groupBy({
+        by: ["quoted_id"],
+        take: 1,
+        _count: {
+          id: true,
+        },
+        orderBy: {
+          _count: {
+            id: "desc",
+          },
+        },
+        where: {
+          quoted_id: oocUser.id,
+        },
+      })
+    ).map(async (quote) => {
+      return {
+        ...quote,
+        author: user,
+      };
+    })
+  );
+  const [timesCreated] = await Promise.all(
+    (
+      await dbClient.ooc.groupBy({
+        by: ["creator_id"],
+        take: 1,
+        _count: {
+          id: true,
+        },
+        orderBy: {
+          _count: {
+            id: "desc",
+          },
+        },
+        where: {
+          creator_id: oocUser.id,
+        },
+      })
+    ).map(async (quote) => {
+      return {
+        ...quote,
+        author: user,
+      };
+    })
+  );
+
+  return {
+    timesQuoted,
+    timesCreated,
   };
 };
