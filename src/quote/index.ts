@@ -305,6 +305,10 @@ quote.on(":entities:bot_command", async (ctx, next) => {
     return;
   }
   const [, quoteKey] = currentCommand.split("/");
+  if (!quoteKey) {
+    await next();
+    return;
+  }
   const existingQuote = await getQuoteByKey(quoteKey);
   if (!existingQuote) {
     await next();
