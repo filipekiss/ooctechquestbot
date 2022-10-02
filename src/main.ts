@@ -21,12 +21,16 @@ import { pronounModule } from "./pronouns";
 import { deliriosModule } from "./delirio";
 import { simpleReply } from "./simple-reply";
 import { lazer } from "./lazer";
-import { replyToSender } from "./utils/message";
+import { replyToSender, sendAsMarkdown } from "./utils/message";
 import { quoteModule } from "./quote";
 import { metadataMiddleware } from "./metadata";
 import { reportStatsModule } from "./report/stats";
 import { twitter } from "./twitter";
-import { presida } from "./presida";
+import {
+  getElectionResultsMessage,
+  presida,
+  setPresidaCallback,
+} from "./presida";
 
 setup();
 console.log("Starting...");
@@ -164,5 +168,12 @@ bot.start({
           };
         })
     );
+    // Set the election timeouts
+    setPresidaCallback(async (CHAT_ID) => {
+      const parsedMessage = await getElectionResultsMessage();
+      await bot.api.sendMessage(CHAT_ID, parsedMessage, {
+        ...sendAsMarkdown,
+      });
+    });
   },
 });
