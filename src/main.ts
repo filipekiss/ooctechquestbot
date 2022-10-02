@@ -26,6 +26,7 @@ import { quoteModule } from "./quote";
 import { metadataMiddleware } from "./metadata";
 import { reportStatsModule } from "./report/stats";
 import { twitter } from "./twitter";
+import { presida } from "./presida";
 
 setup();
 console.log("Starting...");
@@ -138,6 +139,7 @@ bot.use(referral);
 bot.use(wow);
 bot.use(acende);
 bot.use(twitter);
+bot.use(presida);
 
 bot.start({
   onStart: async (me) => {
