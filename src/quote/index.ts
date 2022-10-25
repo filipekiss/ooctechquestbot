@@ -259,9 +259,9 @@ quote.command("quote", async (ctx, next) => {
         await next();
         return;
       }
-      await removeQuoteByKey(key);
       await ctx.reply(`Pronto! Removi a quote ${key}`, replyToSender(ctx));
       await quoteStats(key, ctx);
+      await removeQuoteByKey(key);
       await next();
       return;
     }
