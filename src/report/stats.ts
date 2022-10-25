@@ -8,6 +8,8 @@ import { getUsernameOrFullname } from "../utils/user";
 
 const reportStats = new Composer<OocContext>();
 
+const RANKING = ["🥇", "🥈", "🥉", "🏅"];
+
 reportStats.command(
   "reportstats",
   withNext(async (ctx) => {
@@ -17,19 +19,31 @@ reportStats.command(
     output.push(
       `*Quantidade de Mensagens Reportadas*: ${quoteStats.totalReportedMessages}`
     );
-    const { topReportedUser } = quoteStats;
-    output.push(
-      `*Usuário mais reportado*: ${getUsernameOrFullname(
-        topReportedUser.reported
-      )}`
-    );
-    const { topReporter } = quoteStats;
-    output.push(
-      `*Usuário que mais reportou mensagens*: ${getUsernameOrFullname(
-        topReporter.reporter
-      )}`
-    );
-    ctx.reply(mdEscape(output.join("\n")), {
+    const { top3ReportedUser } = quoteStats;
+    output.push(`*Ranking Usuários Reportados*:`);
+    top3ReportedUser.forEach((user, index) => {
+      output.push(
+        `${RANKING[index] || RANKING[3]} ${mdEscape(
+          getUsernameOrFullname(user.reported),
+          {
+            escapeItalic: true,
+          }
+        )} \\(${user._count.id}\\)`
+      );
+    });
+    const { top3ReporterUser } = quoteStats;
+    output.push(`*Ranking Usuários que mais Reportaram*:`);
+    top3ReporterUser.forEach((user, index) => {
+      output.push(
+        `${RANKING[index] || RANKING[3]} ${mdEscape(
+          getUsernameOrFullname(user.reporter),
+          {
+            escapeItalic: true,
+          }
+        )} \\(${user._count.id}\\)`
+      );
+    });
+    ctx.reply(output.join("\n"), {
       ...sendAsMarkdown(),
     });
   })

@@ -55,11 +55,11 @@ export const reportMessage = async (message: Message) => {
 
 export const getReportStats = async () => {
   const totalReportedMessages = await dbClient.reportedMessage.count();
-  const [topReportedUser] = await Promise.all(
+  const top3ReportedUser = await Promise.all(
     (
       await dbClient.reportedMessage.groupBy({
         by: ["reported_id"],
-        take: 1,
+        take: 3,
         _count: {
           id: true,
         },
@@ -77,11 +77,11 @@ export const getReportStats = async () => {
       };
     })
   );
-  const [topReporter] = await Promise.all(
+  const top3ReporterUser = await Promise.all(
     (
       await dbClient.reportedMessage.groupBy({
         by: ["reporter_id"],
-        take: 1,
+        take: 3,
         _count: {
           id: true,
         },
@@ -101,7 +101,7 @@ export const getReportStats = async () => {
   );
   return {
     totalReportedMessages,
-    topReportedUser,
-    topReporter,
+    top3ReportedUser,
+    top3ReporterUser,
   };
 };

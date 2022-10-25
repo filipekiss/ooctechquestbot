@@ -61,8 +61,16 @@ const addModuleToBot = (module: BotModule) => {
   bot.use(module.composer);
 };
 
-export function mdEscape(text: string): string {
-  return text.replace(/[[\]()~>#+\-=|{}.!\\]/g, "\\$&");
+export function mdEscape(
+  text: string,
+  options: { escapeItalic: boolean } = { escapeItalic: false }
+): string {
+  const noItalicRegex = /[[\]()~>#+\-=|{}.!\\]/g;
+  const italicRegex = /[[\]_()~>#+\-=|{}.!\\]/g;
+  if (options.escapeItalic) {
+    return text.replace(italicRegex, "\\$&");
+  }
+  return text.replace(noItalicRegex, "\\$&");
 }
 
 const help = (commandsRegister: any) => {
