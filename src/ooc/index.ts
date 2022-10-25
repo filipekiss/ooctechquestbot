@@ -13,6 +13,7 @@ import {
 import { BotModule, mdEscape } from "../main";
 import { parseArguments } from "../telegram/messages";
 import { replyToSender, sendAsMarkdown } from "../utils/message";
+import { withNext } from "../utils/middleware";
 import { getUsernameOrFullname } from "../utils/user";
 import { generateQuoteImage } from "./generate-quote-image";
 import { removeSurroundingQuotes } from "./remove-surrounding-quotes";
@@ -139,6 +140,22 @@ ooc.on("message:entities:mention", async (ctx, next) => {
     await archiveMessage(ctx, next);
   }
 });
+
+const STICKER_22 = "AgADgAADktWiDA";
+const STICKER_13 = "AgADhgADktWiDA";
+
+const STICKER_13_FILE =
+  "CAACAgEAAxkBAAIDp2NYMFr_-KmCVm_MMEsTyUCUy3mxAAKGAAOS1aIMwEZ0GEt3ELUqBA";
+
+ooc.on(
+  "message:sticker",
+  withNext(async (ctx) => {
+    const receivedStickerId = ctx.update.message.sticker.file_unique_id;
+    if (receivedStickerId === STICKER_22) {
+      await ctx.replyWithSticker(STICKER_13_FILE, replyToSender(ctx));
+    }
+  })
+);
 
 export const oocModule: BotModule = {
   command: "ooc",
