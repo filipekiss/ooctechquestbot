@@ -41,6 +41,8 @@ export const msToTime = (duration: number) => {
 
 const API_URL =
   "https://resultados.tse.jus.br/oficial/ele2022/544/dados-simplificados/br/br-c0001-e000544-r.json";
+const API_URL_SECOND_TERM =
+  "https://resultados.tse.jus.br/oficial/ele2022/545/dados-simplificados/br/br-c0001-e000545-r.json";
 
 interface Candidate {
   /** Nome */
@@ -80,7 +82,7 @@ const makeProgressBar = (value: string): string => {
 };
 
 export async function getElectionResultsMessage() {
-  const response = await got(API_URL).json<TSE_RESPONSE>();
+  const response = await got(API_URL_SECOND_TERM).json<TSE_RESPONSE>();
   const output = [];
   const candidates = response.cand.map((candidate) => {
     return `${candidate.nm.replace("&apos;", "'")} - ${candidate.pvap}% (${
