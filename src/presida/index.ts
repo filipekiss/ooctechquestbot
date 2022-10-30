@@ -91,7 +91,9 @@ export async function getElectionResultsMessage() {
   });
   output.push(...candidates);
   output.push("*▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁*");
-  output.push(`Seções Apuradas: ${response.sa} de ${response.s}`);
+  output.push(
+    `Seções Apuradas: ${response.sa} de ${response.s} (${response.pst}%)`
+  );
   output.push(
     `Atualizado em ${response.dt} ${response.ht} (Horário de Brasília)`
   );
