@@ -33,7 +33,8 @@ async function replyAlreadyAdded(ctx: OocContext) {
 const banReason = new Composer<OocContext>();
 banReason.command("banreason", async (ctx: OocContext, next) => {
   const reason = ctx.match as string;
-  if (!reason || reason === "list") {
+  const [action] = reason.split(" ");
+  if (!reason || action === "list") {
     ctx.replyWithChatAction("typing");
     const reasons = await getAllBanReasons();
     if (reasons.length > 0) {
@@ -47,7 +48,7 @@ banReason.command("banreason", async (ctx: OocContext, next) => {
     return;
   }
 
-  if (reason.startsWith("remove ")) {
+  if (action === "remove" || action === "delete") {
     const isUserAdmin = await isAdmin(ctx);
     if (!isUserAdmin) {
       ctx.reply("Apenas admins podem remover razões pra ser banido", {
@@ -69,12 +70,15 @@ banReason.command("banreason", async (ctx: OocContext, next) => {
         }
       );
     } else {
-      ctx.reply(
-        `Parece que ${reasonToRemove} ainda não é uma razão pra ser banido`,
-        {
-          ...replyToSender(ctx),
-        }
-      );
+      let errorMessage;
+      if (!reasonToRemove) {
+        errorMessage = `Você precisa especificar uma razão pra ser removida.`;
+      } else {
+        errorMessage = `Parece que ${reasonToRemove} ainda não é uma razão pra ser banido.`;
+      }
+      ctx.reply(errorMessage, {
+        ...replyToSender(ctx),
+      });
     }
     await next();
     return;
