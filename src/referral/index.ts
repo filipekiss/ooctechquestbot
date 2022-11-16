@@ -55,9 +55,8 @@ const referralSites: ReferralConfig[] = [
         }
       } catch {
         console.log("Error expanding link");
-      } finally {
-        return null;
       }
+      return null;
     },
   },
   {
@@ -148,7 +147,10 @@ referral.hears(
   async (ctx, next) => {
     const receivedMessage = ctx.message!;
     const store = referralSites.find((config) => {
-      return receivedMessage.text!.match(config.pattern);
+      return (
+        receivedMessage.text?.match(config.pattern) ||
+        receivedMessage.caption?.match(config.pattern)
+      );
     });
     if (!store) {
       await next();
