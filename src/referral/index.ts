@@ -3,6 +3,8 @@ import { Composer, InlineKeyboard } from "grammy";
 import { OocContext } from "../config";
 import { replyToSender } from "../utils/message";
 
+const AMAZON_AFFILIATE_TAG = "sup044-20";
+
 type ReferralConfig = {
   store: string;
   buttonText: string;
@@ -19,7 +21,7 @@ const referralSites: ReferralConfig[] = [
       /(https:\/\/(?:www.)?amazon.com.br)\/(?:[^\/]+\/)?([^\/]+)\/ref=(?:[^\/?]+)/gm,
     transform: (matches) => {
       const [, amazonUrl, id] = matches;
-      const affiliate = "?tag=mq08-20";
+      const affiliate = `?tag=${AMAZON_AFFILIATE_TAG}`;
       return `${amazonUrl}/dp/${id}${affiliate}`;
     },
   },
@@ -30,7 +32,7 @@ const referralSites: ReferralConfig[] = [
       /(https:\/\/(?:www.)?amazon.com.br)\/(?:[^\/]+\/)?(?:[^\/]+)\/([^\/?]+)/gm,
     transform: (matches) => {
       const [, amazonUrl, id] = matches;
-      const affiliate = "?tag=mq08-20";
+      const affiliate = `?tag=${AMAZON_AFFILIATE_TAG}`;
       return `${amazonUrl}/dp/${id}${affiliate}`;
     },
   },
