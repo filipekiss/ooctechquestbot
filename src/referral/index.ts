@@ -18,7 +18,7 @@ const referralSites: ReferralConfig[] = [
     store: "amazonref",
     buttonText: "Ver na Amazon",
     pattern:
-      /(https:\/\/(?:www.)?amazon.com.br)\/(?:[^\/]+\/)?([^\/]+)\/ref=(?:[^\/?]+)/gm,
+      /(https:\/\/(?:www\.)?amazon\.com\.br)\/(?:[^\/]+\/)*([^\/]+)\/ref=(?:[^\/?]+)/gm,
     transform: (matches) => {
       const [, amazonUrl, id] = matches;
       const affiliate = `?tag=${AMAZON_AFFILIATE_TAG}`;
@@ -29,7 +29,7 @@ const referralSites: ReferralConfig[] = [
     store: "amazon",
     buttonText: "Ver na Amazon",
     pattern:
-      /(https:\/\/(?:www.)?amazon.com.br)\/(?:[^\/]+\/)?(?:[^\/]+)\/([^\/?]+)/gm,
+      /(https:\/\/(?:www\.)?amazon\.com\.br)\/(?:[^\/]+\/)*([^\/]+)\/ref=(?:[^\/?]+)/gm,
     transform: (matches) => {
       const [, amazonUrl, id] = matches;
       const affiliate = `?tag=${AMAZON_AFFILIATE_TAG}`;
