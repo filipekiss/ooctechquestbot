@@ -143,7 +143,7 @@ addModuleToBot(repetidaModule);
 addModuleToBot(reportModule);
 addModuleToBot(reportStatsModule);
 addModuleToBot(revoltaModule);
-addModuleToBot(perdoaModule);
+// addModuleToBot(perdoaModule);
 bot.use(help(commandRegister));
 bot.use(lazer);
 bot.use(simpleReply);
