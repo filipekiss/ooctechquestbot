@@ -31,6 +31,7 @@ import {
   presida,
   setPresidaCallback,
 } from "./presida";
+import { perdoaModule } from "./perdao";
 
 setup();
 console.log("Starting...");
@@ -142,6 +143,7 @@ addModuleToBot(repetidaModule);
 addModuleToBot(reportModule);
 addModuleToBot(reportStatsModule);
 addModuleToBot(revoltaModule);
+addModuleToBot(perdoaModule);
 bot.use(help(commandRegister));
 bot.use(lazer);
 bot.use(simpleReply);
