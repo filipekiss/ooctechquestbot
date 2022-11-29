@@ -32,6 +32,7 @@ import {
   setPresidaCallback,
 } from "./presida";
 import { perdoaModule } from "./perdao";
+import { passaroModule } from "./passaro";
 
 setup();
 console.log("Starting...");
@@ -144,6 +145,7 @@ addModuleToBot(reportModule);
 addModuleToBot(reportStatsModule);
 addModuleToBot(revoltaModule);
 // addModuleToBot(perdoaModule);
+addModuleToBot(passaroModule);
 bot.use(help(commandRegister));
 bot.use(lazer);
 bot.use(simpleReply);
