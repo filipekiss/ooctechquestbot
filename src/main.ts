@@ -1,38 +1,38 @@
-import { hydrate } from "@grammyjs/hydrate";
 import { FileApiFlavor, hydrateFiles } from "@grammyjs/files";
+import { hydrate } from "@grammyjs/hydrate";
 import { Api, Bot, Composer, InputFile } from "grammy";
 import { acende } from "./acende";
 import { badumtsModule } from "./badumts";
+import { banModule } from "./ban";
+import { banReasonModule } from "./ban/reason";
 import { OocContext, setup } from "./config";
 import { BOT_TOKEN } from "./config/environment";
-import { oocModule } from "./ooc";
-import { reportModule } from "./report";
-import { nftModule } from "./nft";
-import { revoltaModule } from "./revolta";
-import { keyboardModule } from "./keyboard";
-import { repetidaModule } from "./repetida";
-import { paolica } from "./paolica";
-import { salpicao } from "./salpicao";
-import { banModule } from "./ban";
-import { wow } from "./wow";
-import { referral } from "./referral";
-import { banReasonModule } from "./ban/reason";
-import { pronounModule } from "./pronouns";
 import { deliriosModule } from "./delirio";
-import { simpleReply } from "./simple-reply";
+import { keyboardModule } from "./keyboard";
 import { lazer } from "./lazer";
-import { replyToSender, sendAsMarkdown } from "./utils/message";
-import { quoteModule } from "./quote";
 import { metadataMiddleware } from "./metadata";
-import { reportStatsModule } from "./report/stats";
-import { twitter } from "./twitter";
+import { nftModule } from "./nft";
+import { oocModule } from "./ooc";
+import { paolica } from "./paolica";
+import { passaroModule } from "./passaro";
 import {
   getElectionResultsMessage,
   presida,
   setPresidaCallback,
 } from "./presida";
-import { perdoaModule } from "./perdao";
-import { passaroModule } from "./passaro";
+import { pronounModule } from "./pronouns";
+import { quoteModule } from "./quote";
+import { referral } from "./referral";
+import { repetidaModule } from "./repetida";
+import { reportModule } from "./report";
+import { reportStatsModule } from "./report/stats";
+import { revoltaModule } from "./revolta";
+import { salpicao } from "./salpicao";
+import { simpleReply } from "./simple-reply";
+import { twitter } from "./twitter";
+import { instagram } from "./instagram";
+import { replyToSender, sendAsMarkdown } from "./utils/message";
+import { wow } from "./wow";
 
 setup();
 console.log("Starting...");
@@ -155,6 +155,7 @@ bot.use(referral);
 bot.use(wow);
 bot.use(acende);
 bot.use(twitter);
+bot.use(instagram);
 bot.use(presida);
 
 bot.start({
