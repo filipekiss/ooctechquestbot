@@ -1,5 +1,5 @@
-import {Context} from "grammy";
-import {OocContext} from "../config";
+import { Context } from "grammy";
+import { OocContext } from "../config";
 
 export type Line = [string];
 export type Frame = Array<Line>;
@@ -26,8 +26,7 @@ export function createAnimatedMessage(animation: Animation | AnimationDefinition
   } else {
     animationFrames = animation;
   }
-  return async function (ctx: OocContext) {
-    console.log("animating");
+  return async function(ctx: OocContext) {
     const [firstFrame, ...restOfFrames] = animationFrames;
     const acendeMsg = await ctx.reply(firstFrame.join("\n"));
     restOfFrames.map((frame, index) => {

@@ -14,12 +14,10 @@ type OocMiddleware = MiddlewareFn<OocContext>;
 export const metadataMiddleware = new Composer<OocContext>();
 
 const toggleChatStatus: OocMiddleware = async (ctx, next) => {
-  console.log("my_chat_member");
   const status = ctx.update?.my_chat_member?.new_chat_member.status;
   switch (status) {
     case "left":
     case "kicked": {
-      console.log(`bot was removed or left chat`);
       const { chat: telegramChat } = ctx.update
         .my_chat_member as ChatMemberUpdated;
       const chat = await getBotChatByTelegramChatId(telegramChat.id);
@@ -27,17 +25,14 @@ const toggleChatStatus: OocMiddleware = async (ctx, next) => {
         await disableBotInChat(chat);
         return;
       }
-      console.log("Chat not found. Skipping…");
     }
     case "member":
     case "administrator": {
       const telegramChat = await ctx.getChat();
       const botChat = await upsertTelegramChat(telegramChat);
-      console.log({ botChat });
       break;
     }
     default:
-      console.log(status);
       await next();
       break;
   }

@@ -15,7 +15,6 @@ export const reportMessage = async (message: Message) => {
   const reporter = message.from;
   const reportedMessage = message.reply_to_message;
   const reported = reportedMessage?.from;
-  console.log({ message, reported, reporter });
   if (!reporter || !reported) {
     throw new Error("No reporter or reported");
   }
