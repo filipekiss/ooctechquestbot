@@ -1,6 +1,6 @@
 import { FileApiFlavor, hydrateFiles } from "@grammyjs/files";
 import { hydrate } from "@grammyjs/hydrate";
-import { Api, Bot, Composer, InputFile } from "grammy";
+import { Api, Bot, Composer, InlineKeyboard, InlineQueryResultBuilder, InputFile } from "grammy";
 import { acende } from "./acende";
 import { badumtsModule } from "./badumts";
 import { banModule } from "./ban";
@@ -33,6 +33,7 @@ import { twitter } from "./twitter";
 import { instagram } from "./instagram";
 import { replyToSender, sendAsMarkdown } from "./utils/message";
 import { wow } from "./wow";
+import { dbClient } from "./data/client";
 
 setup();
 console.log("Starting...");
@@ -49,10 +50,10 @@ const commandRegister = new Map<string, BotModule>();
 
 const addToRegister =
   <K, V>(register: Map<K, V>) =>
-  (key: K, value: V) => {
-    console.log(`Registering ${key}`);
-    return register.set(key, value);
-  };
+    (key: K, value: V) => {
+      console.log(`Registering ${key}`);
+      return register.set(key, value);
+    };
 const addToCommandRegister = addToRegister(commandRegister);
 
 const bot = new Bot<OocContext, FileApiFlavor<Api>>(BOT_TOKEN);
@@ -157,6 +158,24 @@ bot.use(acende);
 bot.use(twitter);
 bot.use(instagram);
 bot.use(presida);
+
+bot.inlineQuery(/quotes (.*)/, async (ctx) => {
+  const match = ctx.match;
+  const [, query] = match as RegExpMatchArray;
+  const foundQuotes = await dbClient.quote.findMany({
+    where: {
+      key: {
+        contains: query
+      }
+    }
+  });
+  const inlineResults = foundQuotes.map(quote => {
+    return InlineQueryResultBuilder.article(`quote-${quote.key}-${quote.id}`, quote.key).text(`Use o comando /${quote.key} para enviar a quote`)
+  });
+  await ctx.answerInlineQuery(inlineResults, {
+    cache_time: 300
+  })
+})
 
 bot.start({
   onStart: async (me) => {
