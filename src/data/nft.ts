@@ -28,27 +28,21 @@ export const getAllNftDefinitions = () => {
 
 export const createNftDefinition = (definition: string, creator: User) => {
   const id = generateIdFromDefinition(definition);
-  return addNftRecord({
-    id,
-    definition,
-    creator: {
-      connectOrCreate: {
-        create: getTelegramUserDetails(creator),
-        where: {
-          telegram_id: creator.id,
+  return dbClient.nftDefinition.create({
+    data: {
+
+      id,
+      definition,
+      creator: {
+        connectOrCreate: {
+          create: getTelegramUserDetails(creator),
+          where: {
+            telegram_id: creator.id,
+          },
         },
       },
-    },
+    }
   });
-};
-
-export const addNftRecord = (
-  data: Prisma.XOR<
-    Prisma.NftDefinitionCreateInput,
-    Prisma.NftDefinitionUncheckedCreateInput
-  >
-) => {
-  return dbClient.nftDefinition.create({ data });
 };
 
 export const generateIdFromDefinition = (definition: string) => {

@@ -8,8 +8,6 @@ import {
 } from "../utils/message";
 import { isAdmin } from "../utils/user";
 import {
-  addBanReasonRecord,
-  deleteBanReason,
   disableReason,
   enableReason,
   generateIdFromReason,
@@ -18,6 +16,7 @@ import {
 } from "../data/ban-reason";
 import { Message } from "@grammyjs/types";
 import { getTelegramUserDetails } from "../data/user";
+import { dbClient } from "../data/client";
 
 export const BANREASON_SCHEMA = {
   BAN_REASONS: "banreasons",
@@ -99,18 +98,20 @@ banReason.command("banreason", async (ctx: OocContext, next) => {
   const date = getMessageDate(ctx.message as Message);
   const id = generateIdFromReason(reason);
   const created_at = new Date(date * 1000);
-  await addBanReasonRecord({
-    id,
-    reason,
-    created_at: created_at.toISOString(),
-    creator: {
-      connectOrCreate: {
-        where: {
-          telegram_id: creator.id,
+  await dbClient.banReason.create({
+    data: {
+      id,
+      reason,
+      created_at: created_at.toISOString(),
+      creator: {
+        connectOrCreate: {
+          where: {
+            telegram_id: creator.id,
+          },
+          create: getTelegramUserDetails(creator),
         },
-        create: getTelegramUserDetails(creator),
       },
-    },
+    }
   });
   await replyReasonEnabled(ctx, reason);
   await next();

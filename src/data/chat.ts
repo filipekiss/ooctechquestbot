@@ -47,9 +47,8 @@ export const upsertTelegramPrivateChat = async (chat: PrivateGetChat) => {
       telegram_id: chat.id,
       type: chat.type,
       is_enabled: true,
-      title: `${chat.first_name} ${chat.last_name} ${
-        chat.username ? `(@${chat.username})` : ""
-      }`,
+      title: `${chat.first_name} ${chat.last_name} ${chat.username ? `(@${chat.username})` : ""
+        }`,
       TelegramPrivateChat: {
         create: {
           type: chat.type,
@@ -81,27 +80,28 @@ export const upsertTelegramChat = async (chat: ChatFromGetChat) => {
   }
 };
 
-export const linkChatToUser = (chat: BotChat, user: TelegramUser) => {
-  return updateChatById(chat.id)({
-    users: {
-      connect: {
-        id: user.id,
-      },
+export const linkChatToUser = async (chat: BotChat, user: TelegramUser) => {
+  return await dbClient.botChat.update({
+    data: {
+      users: {
+        connect: {
+          id: user.id
+        }
+      }
     },
+    where: {
+      id: chat.id
+    }
   });
 };
 
-export const disableBotInChat = (chat: BotChat) => {
-  return updateChatById(chat.id)({ is_enabled: false });
-};
-
-const updateChatById = (id: number) => {
-  return async (data: Prisma.BotChatUpdateArgs["data"]) => {
-    return dbClient.botChat.update({
-      where: {
-        id,
-      },
-      data,
-    });
-  };
+export const disableBotInChat = async (chat: BotChat) => {
+  return await dbClient.botChat.update({
+    data: {
+      is_enabled: false
+    },
+    where: {
+      id: chat.id
+    }
+  })
 };

@@ -29,7 +29,7 @@ const toggleChatStatus: OocMiddleware = async (ctx, next) => {
     case "member":
     case "administrator": {
       const telegramChat = await ctx.getChat();
-      const botChat = await upsertTelegramChat(telegramChat);
+      const botChat = await upsertTelegramChat(telegramChat as ChatFromGetChat);
       break;
     }
     default:
@@ -44,7 +44,7 @@ const registerChatDetails: OocMiddleware = async (ctx, next) => {
   try {
     const user = await upsertTelegramUser(ctx.from as User);
     const telegramChat = await ctx.getChat();
-    const botChat = await upsertTelegramChat(telegramChat);
+    const botChat = await upsertTelegramChat(telegramChat as ChatFromGetChat);
     if (botChat) {
       await linkChatToUser(botChat, user);
     }

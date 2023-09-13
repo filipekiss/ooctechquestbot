@@ -1,6 +1,6 @@
+import { Message } from "@grammyjs/types";
 import { differenceInCalendarDays, format, parse } from "date-fns";
-import { Composer } from "grammy";
-import { InputFile, ReplyMessage } from "grammy/out/platform";
+import { Composer, InputFile } from "grammy";
 import { OocContext } from "../config";
 import { getMetaValue, setMetaValue } from "../data/meta";
 import { getReportedMessageByMessageId, reportMessage } from "../data/report";
@@ -97,7 +97,7 @@ report.filter(isReply).command(
 	withNext(async (ctx) => {
 		if (ctx.message && ctx.message.reply_to_message) {
 			const receivedMessage = ctx.message;
-			const reportedMessage = receivedMessage.reply_to_message as ReplyMessage;
+			const reportedMessage = receivedMessage.reply_to_message as Message;
 			// Check if message has been reported
 			if (await getReportedMessageByMessageId(reportedMessage.message_id)) {
 				await replyAlreadyReported(ctx);
@@ -107,8 +107,7 @@ report.filter(isReply).command(
 			const currentStreak = calculateStreakDifference(today, previousIncidentDate);
 			await updateStreakWithLargest(longestStreak, currentStreak);
 			await setMetaValue(REPORT_SCHEMA.LAST_INCIDENT_DATE, today);
-			console.log(reportedMessage);
-			await reportMessage(receivedMessage);
+			await reportMessage(receivedMessage as Message);
 
 			return sendReport(ctx, true);
 		}

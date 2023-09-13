@@ -1,4 +1,4 @@
-import { User } from "@grammyjs/types";
+import { Message, User } from "@grammyjs/types";
 import { Composer, InputFile, NextFunction } from "grammy";
 import { basename, parse } from "path";
 import { OocContext } from "../config";
@@ -69,7 +69,7 @@ async function archiveMessage(ctx: OocContext, next: NextFunction) {
       ctx.api.sendChatAction(ARCHIVE_CHANNEL_ID, "upload_photo");
       const quoteText = removeSurroundingQuotes(messageToQuote.text);
       const newOoc = await createOoc(
-        messageToQuote,
+        messageToQuote as Message,
         messageToQuote.from as User,
         receivedMessage.from as User
       );
@@ -116,10 +116,8 @@ ooc.command("oocstats", async (ctx, next) => {
   );
   output.push(`*===*`);
   output.push(
-    `Você foi citado ${userStats.timesQuoted._count.id} vez${
-      userStats.timesQuoted._count.id > 1 ? "es" : ""
-    } e criou ${userStats.timesCreated._count.id} citaç${
-      userStats.timesCreated._count.id > 1 ? "ões" : "ão"
+    `Você foi citado ${userStats.timesQuoted._count.id} vez${userStats.timesQuoted._count.id > 1 ? "es" : ""
+    } e criou ${userStats.timesCreated._count.id} citaç${userStats.timesCreated._count.id > 1 ? "ões" : "ão"
     }`
   );
   output.push(`_Estatísticas contadas a partir de 6 de Julho de 2022_`);

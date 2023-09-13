@@ -39,19 +39,21 @@ export const getAllBanReasons = () => {
   });
 };
 
-export const addBanReason = (reason: string, creator: User) => {
+export const addBanReason = async (reason: string, creator: User) => {
   const id = generateIdFromReason(reason);
-  return addBanReasonRecord({
-    id,
-    reason,
-    creator: {
-      connectOrCreate: {
-        create: getTelegramUserDetails(creator),
-        where: {
-          telegram_id: creator.id,
+  return await dbClient.banReason.create({
+    data: {
+      id,
+      reason,
+      creator: {
+        connectOrCreate: {
+          create: getTelegramUserDetails(creator),
+          where: {
+            telegram_id: creator.id,
+          },
         },
       },
-    },
+    }
   });
 };
 
@@ -75,15 +77,6 @@ export const disableReason = async (reason: string) => {
       is_active: false,
     },
   });
-};
-
-export const addBanReasonRecord = (
-  data: Prisma.XOR<
-    Prisma.BanReasonCreateInput,
-    Prisma.BanReasonUncheckedCreateInput
-  >
-) => {
-  return dbClient.banReason.create({ data });
 };
 
 export const generateIdFromReason = (reason: string) => {

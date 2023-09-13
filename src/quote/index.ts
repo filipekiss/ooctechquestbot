@@ -1,4 +1,4 @@
-import { User } from "@grammyjs/types";
+import { Message, User } from "@grammyjs/types";
 import { Composer } from "grammy";
 import { OocContext } from "../config";
 import { incrementMetaCount } from "../data/meta";
@@ -57,8 +57,7 @@ async function quoteStats(key: string, ctx: OocContext) {
       quoteStats.quoted_by
     )} e é de autoria de ${getUsernameOrFullname(
       quoteStats.author
-    )}. Ela foi usada ${quoteStats.uses} vez${
-      quoteStats.uses === 1 ? "" : "es"
+    )}. Ela foi usada ${quoteStats.uses} vez${quoteStats.uses === 1 ? "" : "es"
     }`
   );
 }
@@ -142,7 +141,7 @@ quote.command("quote", async (ctx, next) => {
       // Add the quote to the database
       await createQuote(
         key,
-        messageToQuote,
+        messageToQuote as Message,
         messageToQuote.from as User,
         ctx.from as User
       );
@@ -194,24 +193,21 @@ quote.command("quote", async (ctx, next) => {
       output.push(`*Quantidade de Quotes*: ${quoteStats.totalQuotes}`);
       const { topQuotedUser } = quoteStats;
       output.push(
-        `*Usuário mais citado*: ${
-          topQuotedUser.author.username
-            ? topQuotedUser.author.username
-            : `${topQuotedUser.author.first_name} ${topQuotedUser.author.last_name}`
+        `*Usuário mais citado*: ${topQuotedUser.author.username
+          ? topQuotedUser.author.username
+          : `${topQuotedUser.author.first_name} ${topQuotedUser.author.last_name}`
         }`
       );
       const { topQuoteAuthor } = quoteStats;
       output.push(
-        `*Usuário que mais criou quotes*: ${
-          topQuoteAuthor.author.username
-            ? topQuoteAuthor.author.username
-            : `${topQuoteAuthor.author.first_name} ${topQuoteAuthor.author.last_name}`
+        `*Usuário que mais criou quotes*: ${topQuoteAuthor.author.username
+          ? topQuoteAuthor.author.username
+          : `${topQuoteAuthor.author.first_name} ${topQuoteAuthor.author.last_name}`
         }`
       );
       const { topThreeUsedQuotes } = quoteStats;
       output.push(
-        `*Top ${
-          topThreeUsedQuotes.length
+        `*Top ${topThreeUsedQuotes.length
         } quotes mais usadas*\n${topThreeUsedQuotes
           .map((quote) => ` • \`${quote.key}\` - ${quote.uses}`)
           .join("\n")}`

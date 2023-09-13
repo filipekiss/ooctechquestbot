@@ -1,7 +1,7 @@
 import { Composer, InputFile } from "grammy";
 import { OocContext } from "../config";
 import { DEFAULT_ASSETS_FOLDER } from "../config/environment";
-import { ReplyMessage, User } from "@grammyjs/types";
+import { Message, User } from "@grammyjs/types";
 import { MessageX } from "@grammyjs/hydrate/out/data/message";
 import { deleteMessage, replyToSender, sendAsMarkdown } from "../utils/message";
 import { withNext } from "../utils/middleware";
@@ -49,7 +49,7 @@ type NftDefinition = {
   n: string;
   f: string;
   t: string;
-  message: ReplyMessage;
+  message: Message
 };
 
 const isValidMeaning = (x: string, startWith: string) =>
@@ -118,8 +118,7 @@ async function sendNftStats(ctx: OocContext) {
   }
   const { topThreeUsedDefinitions } = nftStats;
   output.push(
-    `*Top ${
-      topThreeUsedDefinitions.length
+    `*Top ${topThreeUsedDefinitions.length
     } definições mais usadas*\n${topThreeUsedDefinitions
       .map(
         (definition) => ` • \`${definition.definition}\` - ${definition.uses}`
@@ -150,7 +149,7 @@ nft.command(
       n: titleCase(n),
       f: titleCase(f),
       t: titleCase(t),
-      message: ctx.message as ReplyMessage,
+      message: ctx.message as Message,
     };
     const existingDefinition = await getNftDefinition(joinNft(definition));
     if (existingDefinition) {
