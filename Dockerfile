@@ -9,9 +9,11 @@ RUN apk add --update --no-cache \
 	giflib-dev \
 	pango-dev
 
+COPY package*.json ./
 COPY . .
 RUN npm install 
 
+RUN npx prisma generate
 
 RUN npm run build
 
