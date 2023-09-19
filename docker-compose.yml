@@ -2,6 +2,12 @@
 version: "3.1"
 
 services:
+  ooctechquest:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    env_file:
+      - ./.env.docker
   db:
     image: postgres
     restart: always

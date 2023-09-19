@@ -1,11 +1,17 @@
-FROM node:14
+FROM node:14-alpine
 WORKDIR /app
 
-COPY package*.json ./
-RUN rm -rf node_modules
-RUN npm ci 
+RUN apk add --update --no-cache \
+	make \
+	g++ \
+	jpeg-dev \
+	cairo-dev \
+	giflib-dev \
+	pango-dev
 
 COPY . .
+RUN npm install 
+
 
 RUN npm run build
 
