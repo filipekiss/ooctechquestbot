@@ -1,13 +1,15 @@
 import { FileApiFlavor, hydrateFiles } from "@grammyjs/files";
 import { hydrate } from "@grammyjs/hydrate";
-import { Api, Bot, Composer, InlineKeyboard, InlineQueryResultBuilder, InputFile } from "grammy";
+import { Api, Bot, Composer, InlineQueryResultBuilder, InputFile } from "grammy";
 import { acende } from "./acende";
 import { badumtsModule } from "./badumts";
 import { banModule } from "./ban";
 import { banReasonModule } from "./ban/reason";
 import { OocContext, setup } from "./config";
 import { BOT_TOKEN } from "./config/environment";
+import { dbClient } from "./data/client";
 import { deliriosModule } from "./delirio";
+import { instagram } from "./instagram";
 import { keyboardModule } from "./keyboard";
 import { lazer } from "./lazer";
 import { metadataMiddleware } from "./metadata";
@@ -18,7 +20,7 @@ import { passaroModule } from "./passaro";
 import {
   getElectionResultsMessage,
   presida,
-  setPresidaCallback,
+  setPresidaCallback
 } from "./presida";
 import { pronounModule } from "./pronouns";
 import { quoteModule } from "./quote";
@@ -29,11 +31,8 @@ import { reportStatsModule } from "./report/stats";
 import { revoltaModule } from "./revolta";
 import { salpicao } from "./salpicao";
 import { simpleReply } from "./simple-reply";
-import { twitter } from "./twitter";
-import { instagram } from "./instagram";
 import { replyToSender, sendAsMarkdown } from "./utils/message";
 import { wow } from "./wow";
-import { dbClient } from "./data/client";
 
 setup();
 console.log("Starting...");
@@ -155,7 +154,7 @@ bot.use(salpicao);
 bot.use(referral);
 bot.use(wow);
 bot.use(acende);
-bot.use(twitter);
+// bot.use(twitter);
 bot.use(instagram);
 bot.use(presida);
 
