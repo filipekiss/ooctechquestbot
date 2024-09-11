@@ -9,7 +9,6 @@ import { OocContext, setup } from "./config";
 import { BOT_TOKEN } from "./config/environment";
 import { dbClient } from "./data/client";
 import { deliriosModule } from "./delirio";
-import { instagram } from "./instagram";
 import { keyboardModule } from "./keyboard";
 import { lazer } from "./lazer";
 import { metadataMiddleware } from "./metadata";
@@ -154,8 +153,6 @@ bot.use(salpicao);
 bot.use(referral);
 bot.use(wow);
 bot.use(acende);
-// bot.use(twitter);
-bot.use(instagram);
 bot.use(presida);
 
 bot.inlineQuery(/quotes (.*)/, async (ctx) => {
