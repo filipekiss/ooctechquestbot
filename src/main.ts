@@ -1,37 +1,21 @@
 import { FileApiFlavor, hydrateFiles } from "@grammyjs/files";
 import { hydrate } from "@grammyjs/hydrate";
-import { Api, Bot, Composer, InlineQueryResultBuilder, InputFile } from "grammy";
+import { Api, Bot, Composer, InputFile } from "grammy";
 import { acende } from "./acende";
 import { badumtsModule } from "./badumts";
-import { banModule } from "./ban";
-import { banReasonModule } from "./ban/reason";
 import { OocContext, setup } from "./config";
 import { BOT_TOKEN } from "./config/environment";
-import { dbClient } from "./data/client";
 import { deliriosModule } from "./delirio";
 import { keyboardModule } from "./keyboard";
 import { lazer } from "./lazer";
-import { metadataMiddleware } from "./metadata";
-import { nftModule } from "./nft";
 import { oocModule } from "./ooc";
 import { paolica } from "./paolica";
-import { passaroModule } from "./passaro";
-import {
-  getElectionResultsMessage,
-  presida,
-  setPresidaCallback
-} from "./presida";
-import { pronounModule } from "./pronouns";
-import { quoteModule } from "./quote";
 import { referral } from "./referral";
 import { repetidaModule } from "./repetida";
-import { reportModule } from "./report";
-import { reportStatsModule } from "./report/stats";
 import { revoltaModule } from "./revolta";
 import { salpicao } from "./salpicao";
 import { simpleReply } from "./simple-reply";
-import { replyToSender, sendAsMarkdown } from "./utils/message";
-import { wow } from "./wow";
+import { replyToSender } from "./utils/message";
 
 setup();
 console.log("Starting...");
@@ -48,10 +32,10 @@ const commandRegister = new Map<string, BotModule>();
 
 const addToRegister =
   <K, V>(register: Map<K, V>) =>
-    (key: K, value: V) => {
-      console.log(`Registering ${key}`);
-      return register.set(key, value);
-    };
+  (key: K, value: V) => {
+    console.log(`Registering ${key}`);
+    return register.set(key, value);
+  };
 const addToCommandRegister = addToRegister(commandRegister);
 
 const bot = new Bot<OocContext, FileApiFlavor<Api>>(BOT_TOKEN);
@@ -64,7 +48,7 @@ const addModuleToBot = (module: BotModule) => {
 
 export function mdEscape(
   text: string,
-  options: { escapeItalic: boolean } = { escapeItalic: false }
+  options: { escapeItalic: boolean } = { escapeItalic: false },
 ): string {
   const noItalicRegex = /[[\]()~>#+\-=|{}.!\\]/g;
   const italicRegex = /[[\]_()~>#+\-=|{}.!\\]/g;
@@ -89,14 +73,14 @@ const help = (commandsRegister: any) => {
       lines.push("———");
       lines.push("");
       lines.push(
-        "Se você responder a uma mensagem mencionando o bot, a mensagem é encaminhada para o canal t.me/ooctechquest"
+        "Se você responder a uma mensagem mencionando o bot, a mensagem é encaminhada para o canal t.me/ooctechquest",
       );
       lines.push("");
       lines.push("Comandos");
       lines.push("———————————");
       lines.push("");
       lines.push(
-        "Você pode solicitar ajuda pra um comando específico, por exemplo: `/ajuda luciano` para ver ajuda do comando `luciano`"
+        "Você pode solicitar ajuda pra um comando específico, por exemplo: `/ajuda luciano` para ver ajuda do comando `luciano`",
       );
       lines.push("");
       commandsRegister.forEach((botModule: any, command: string) => {
@@ -129,49 +113,40 @@ const help = (commandsRegister: any) => {
 };
 
 bot.use(hydrate());
-bot.use(metadataMiddleware);
 addModuleToBot(oocModule);
 addModuleToBot(badumtsModule);
-addModuleToBot(banModule);
-addModuleToBot(banReasonModule);
 addModuleToBot(deliriosModule);
 addModuleToBot(keyboardModule);
-addModuleToBot(nftModule);
-addModuleToBot(pronounModule);
-addModuleToBot(quoteModule);
 addModuleToBot(repetidaModule);
-addModuleToBot(reportModule);
-addModuleToBot(reportStatsModule);
 addModuleToBot(revoltaModule);
-// addModuleToBot(perdoaModule);
-addModuleToBot(passaroModule);
 bot.use(help(commandRegister));
 bot.use(lazer);
 bot.use(simpleReply);
 bot.use(paolica);
 bot.use(salpicao);
 bot.use(referral);
-bot.use(wow);
 bot.use(acende);
-bot.use(presida);
 
-bot.inlineQuery(/quotes (.*)/, async (ctx) => {
-  const match = ctx.match;
-  const [, query] = match as RegExpMatchArray;
-  const foundQuotes = await dbClient.quote.findMany({
-    where: {
-      key: {
-        contains: query
-      }
-    }
-  });
-  const inlineResults = foundQuotes.map(quote => {
-    return InlineQueryResultBuilder.article(`quote-${quote.key}-${quote.id}`, quote.key).text(`Use o comando /${quote.key} para enviar a quote`)
-  });
-  await ctx.answerInlineQuery(inlineResults, {
-    cache_time: 300
-  })
-})
+// bot.inlineQuery(/quotes (.*)/, async (ctx) => {
+//   const match = ctx.match;
+//   const [, query] = match as RegExpMatchArray;
+//   const foundQuotes = await dbClient.quote.findMany({
+//     where: {
+//       key: {
+//         contains: query,
+//       },
+//     },
+//   });
+//   const inlineResults = foundQuotes.map((quote) => {
+//     return InlineQueryResultBuilder.article(
+//       `quote-${quote.key}-${quote.id}`,
+//       quote.key,
+//     ).text(`Use o comando /${quote.key} para enviar a quote`);
+//   });
+//   await ctx.answerInlineQuery(inlineResults, {
+//     cache_time: 300,
+//   });
+// });
 
 bot.start({
   onStart: async (me) => {
@@ -194,14 +169,14 @@ bot.start({
             command: command.command as string,
             description: command.shortDescription as string,
           };
-        })
+        }),
     );
     // Set the election timeouts
-    setPresidaCallback(async (CHAT_ID) => {
-      const parsedMessage = await getElectionResultsMessage();
-      await bot.api.sendMessage(CHAT_ID, parsedMessage, {
-        ...sendAsMarkdown,
-      });
-    });
+    // setPresidaCallback(async (CHAT_ID) => {
+    //   const parsedMessage = await getElectionResultsMessage();
+    //   await bot.api.sendMessage(CHAT_ID, parsedMessage, {
+    //     ...sendAsMarkdown,
+    //   });
+    // });
   },
 });
