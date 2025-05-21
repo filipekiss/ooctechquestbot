@@ -1,13 +1,7 @@
-FROM node:14-alpine
+FROM node:14
 WORKDIR /app
 
-RUN apk add --update --no-cache \
-	make \
-	g++ \
-	jpeg-dev \
-	cairo-dev \
-	giflib-dev \
-	pango-dev
+RUN apt-get update && apt-get install -y build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev libtool autoconf automake
 
 COPY package*.json ./
 COPY . .
