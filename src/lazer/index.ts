@@ -14,25 +14,33 @@ lazer.command("lazer", async (ctx, next) => {
     return;
   }
   ctx.replyWithChatAction("upload_photo");
-  if (receivedMessage.from?.id === replyToMessage.from?.id) {
-    await sendDelirio(ctx, next);
-    return;
-  }
+  // if (receivedMessage.from?.id === replyToMessage.from?.id) {
+  //   await sendDelirio(ctx, next);
+  //   return;
+  // }
   const senderPhotos = await ctx.api.getUserProfilePhotos(
-    receivedMessage.from?.id as number
+    receivedMessage.from?.id as number,
   );
   const receiverPhotos = await ctx.api.getUserProfilePhotos(
-    replyToMessage.from?.id as number
+    replyToMessage.from?.id as number,
   );
-  const [senderPhotoDetails] = senderPhotos.photos;
-  const [receiverPhotoDetails] = receiverPhotos.photos;
-  const [, , senderPhoto] = senderPhotoDetails;
-  const [, , receiverPhoto] = receiverPhotoDetails;
 
-  const senderPhotoImage = await ctx.api.getFile(senderPhoto.file_id);
-  const receiverPhotoImage = await ctx.api.getFile(receiverPhoto.file_id);
-  const senderPhotoFile = await senderPhotoImage.download();
-  const receiverPhotoFile = await receiverPhotoImage.download();
+  let senderPhotoFile;
+  let receiverPhotoFile;
+
+  if (senderPhotos.total_count > 0) {
+    const [senderPhotoDetails] = senderPhotos.photos;
+    const [, , senderPhoto] = senderPhotoDetails;
+    const senderPhotoImage = await ctx.api.getFile(senderPhoto.file_id);
+    senderPhotoFile = await senderPhotoImage.download();
+  }
+  if (receiverPhotos.total_count > 0) {
+    const [receiverPhotoDetails] = receiverPhotos.photos;
+    const [, , receiverPhoto] = receiverPhotoDetails;
+
+    const receiverPhotoImage = await ctx.api.getFile(receiverPhoto.file_id);
+    receiverPhotoFile = await receiverPhotoImage.download();
+  }
   const image = await generateLazerImage(senderPhotoFile, receiverPhotoFile);
   ctx.replyWithPhoto(new InputFile(image), {
     ...replyToReply(ctx),
