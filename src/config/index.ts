@@ -6,6 +6,7 @@ import {
   BOT_TOKEN,
   BOT_USERNAME,
   DEFAULT_ASSETS_FOLDER,
+  SQLITE_DB_PATH,
 } from "./environment";
 
 function abortIfEmpty(key: string, value: unknown) {
@@ -22,4 +23,5 @@ export function setup() {
   abortIfEmpty(`BOT_USERNAME`, BOT_USERNAME);
   abortIfEmpty(`ARCHIVE_CHANNEL_ID`, ARCHIVE_CHANNEL_ID);
   abortIfEmpty(`DEFAULT_ASSETS_FOLDER`, DEFAULT_ASSETS_FOLDER);
+  abortIfEmpty(`SQLITE_DB_PATH`, SQLITE_DB_PATH);
 }

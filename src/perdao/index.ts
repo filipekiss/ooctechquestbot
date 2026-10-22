@@ -7,7 +7,7 @@ import { withNext } from "../utils/middleware";
 
 export const perdao = new Composer<OocContext>();
 
-export const sendDelirio = withNext(async (context: OocContext) => {
+export const sendPerdao = withNext(async (context: OocContext) => {
   await context.replyWithPhoto(
     new InputFile(`${DEFAULT_ASSETS_FOLDER}/perdao.jpeg`),
     {
@@ -16,11 +16,11 @@ export const sendDelirio = withNext(async (context: OocContext) => {
   );
 });
 
-perdao.command(["perdoa", "perdao"], sendDelirio);
+perdao.command(["perdoa", "perdao"], sendPerdao);
 
 export const perdoaModule: BotModule = {
   command: "perdoa",
-  alias: ["perdoa", "perdao"],
+  alias: ["perdao"],
   shortDescription: "Os cara não perdoa uma",
   composer: perdao,
 };

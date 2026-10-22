@@ -1,15 +1,18 @@
 import { Composer, InputFile, NextFunction } from "grammy";
 import { OocContext } from "../config";
 import { ARCHIVE_CHANNEL_ID, BOT_USERNAME } from "../config/environment";
-import { BotModule, mdEscape } from "../main";
+import { db } from "../libs/db";
+import { BotModule } from "../main";
 import { parseArguments } from "../telegram/messages";
-import { replyToSender, sendAsMarkdown } from "../utils/message";
+import { replyToSender } from "../utils/message";
 import { withNext } from "../utils/middleware";
 import { getUsernameOrFullname } from "../utils/user";
 import { generateQuoteImage } from "./generate-quote-image";
 import { removeSurroundingQuotes } from "./remove-surrounding-quotes";
+import { createOocStore } from "./store";
 
 const ooc = new Composer<OocContext>();
+const oocStore = createOocStore(db);
 
 async function replyAlreadyQuoted(ctx: OocContext) {
   const receivedMessage = ctx.message!;
@@ -40,11 +43,23 @@ async function archiveMessage(ctx: OocContext, next: NextFunction) {
     return;
   }
 
-  // if (await getOocByMessageId(messageToQuote.message_id)) {
-  //   replyAlreadyQuoted(ctx);
-  //   await next();
-  //   return;
-  // }
+  const chatId = String(receivedMessage.chat.id);
+  if (oocStore.has(chatId, messageToQuote.message_id)) {
+    await replyAlreadyQuoted(ctx);
+    await next();
+    return;
+  }
+  const recordOoc = () => {
+    if (!messageToQuote.from || !receivedMessage.from) return;
+    oocStore.add({
+      chat_id: chatId,
+      source_message_id: messageToQuote.message_id,
+      author_id: messageToQuote.from.id,
+      author_name: getUsernameOrFullname(messageToQuote.from),
+      forwarded_by_id: receivedMessage.from.id,
+      forwarded_by_name: getUsernameOrFullname(receivedMessage.from),
+    });
+  };
   const [query] = parseArguments(receivedMessage.text as string);
   try {
     await ctx.api.forwardMessage(
@@ -52,6 +67,7 @@ async function archiveMessage(ctx: OocContext, next: NextFunction) {
       receivedMessage.chat.id,
       messageToQuote.message_id,
     );
+    recordOoc();
   } catch (e) {
     console.log("Message not found, not forwarded");
   } finally {
@@ -59,11 +75,6 @@ async function archiveMessage(ctx: OocContext, next: NextFunction) {
       console.log("Message has text, generating quote");
       ctx.api.sendChatAction(ARCHIVE_CHANNEL_ID, "upload_photo");
       const quoteText = removeSurroundingQuotes(messageToQuote.text);
-      // const newOoc = await createOoc(
-      //   messageToQuote as Message,
-      //   messageToQuote.from as User,
-      //   receivedMessage.from as User
-      // );
       const generatedImage = await generateQuoteImage({
         text: quoteText,
         author:
@@ -76,8 +87,7 @@ async function archiveMessage(ctx: OocContext, next: NextFunction) {
           ARCHIVE_CHANNEL_ID,
           new InputFile(generatedImage.canvas),
         );
-        // const { name: imageName } = parse(generatedImage.image);
-        /* await addImageToOoc(newOoc, imageName) */
+        recordOoc();
       }
       await next();
       return;
@@ -90,38 +100,27 @@ const botUsername = BOT_USERNAME.toLowerCase();
 ooc.command("ooc", async (ctx, next) => {
   await archiveMessage(ctx, next);
 });
-// ooc.command("oocstats", async (ctx, next) => {
-//   const stats = await getOocStats();
-//   const userStats = await getOocStatsForUser(ctx.update.message?.from!);
-//   ctx.replyWithChatAction("typing");
-//   const output: string[] = [];
-//   output.push(`*Mensagens encaminhadas*: ${stats.totalOoc}`);
-//   const { topOocUser } = stats;
-//   output.push(
-//     `*Usuário mais encaminhado*: ${getUsernameOrFullname(topOocUser.author)}`,
-//   );
-//   const { topOocAuthor } = stats;
-//   output.push(
-//     `*Usuário que mais encaminhou mensagens*: ${getUsernameOrFullname(
-//       topOocAuthor.author,
-//     )}`,
-//   );
-//   output.push(`*===*`);
-//   output.push(
-//     `Você foi citado ${userStats.timesQuoted._count.id} vez${
-//       userStats.timesQuoted._count.id > 1 ? "es" : ""
-//     } e criou ${userStats.timesCreated._count.id} citaç${
-//       userStats.timesCreated._count.id > 1 ? "ões" : "ão"
-//     }`,
-//   );
-//   output.push(`_Estatísticas contadas a partir de 6 de Julho de 2022_`);
-//   ctx.reply(mdEscape(output.join("\n")), {
-//     ...sendAsMarkdown(),
-//     ...replyToSender(ctx),
-//   });
-//   await next();
-//   return;
-// });
+ooc.command("oocstats", async (ctx, next) => {
+  const stats = oocStore.stats(String(ctx.chat.id), ctx.from!.id);
+  const output: string[] = [`Mensagens encaminhadas: ${stats.total}`];
+  if (stats.topAuthor) {
+    output.push(`Usuário mais encaminhado: ${stats.topAuthor.name}`);
+  }
+  if (stats.topForwarder) {
+    output.push(`Usuário que mais encaminhou mensagens: ${stats.topForwarder.name}`);
+  }
+  output.push("===");
+  output.push(
+    `Você foi citado ${stats.timesQuoted} vez${stats.timesQuoted === 1 ? "" : "es"} e criou ${stats.timesCreated} citaç${stats.timesCreated === 1 ? "ão" : "ões"}`,
+  );
+  if (stats.since) {
+    output.push(
+      `Estatísticas contadas a partir de ${new Date(stats.since * 1000).toLocaleDateString("pt-BR")}`,
+    );
+  }
+  await ctx.reply(output.join("\n"), { ...replyToSender(ctx) });
+  await next();
+});
 ooc.on("message:entities:mention", async (ctx, next) => {
   const receivedMessage = ctx.update.message;
   const isPureMention = receivedMessage.text
@@ -130,7 +129,9 @@ ooc.on("message:entities:mention", async (ctx, next) => {
 
   if (isPureMention) {
     await archiveMessage(ctx, next);
+    return;
   }
+  await next();
 });
 
 const STICKER_22 = "AgADgAADktWiDA";

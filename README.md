@@ -10,7 +10,12 @@ Copie o arquivo `environment.ts.example` para `environment.ts`. O `BOT_TOKEN`
 mensagens devem ser encaminhadas.
 
 
-Execute `npm start`
+Variáveis de ambiente (`.env`): `BOT_TOKEN`, `BOT_USERNAME`, `ARCHIVE_CHANNEL_ID`
+(canal do /ooc), `QUOTES_CHANNEL_ID` (canal onde as quotes ficam salvas, opcional:
+sem ele as quotes ficam desativadas), `DB_NAME` e `AMAZON_AFFILIATE_TAG`.
+
+Execute `npm start`. Para usar um bot de teste, crie `.env.dev` e rode `npm run dev`.
+Testes: `npm test`.
 
 [grupo]: https://t.me/joinchat/S2uNQsSa1Q4cBHHC
 [canal]: https://t.me/ooctechquest

@@ -1,6 +1,6 @@
 import { Composer, InputFile } from "grammy";
 import { OocContext } from "../config";
-import { sendDelirio } from "../delirio";
+import { BotModule } from "../main";
 import { replyToReply } from "../utils/message";
 import { generateLazerImage } from "./generate-image";
 
@@ -14,10 +14,6 @@ lazer.command("lazer", async (ctx, next) => {
     return;
   }
   ctx.replyWithChatAction("upload_photo");
-  // if (receivedMessage.from?.id === replyToMessage.from?.id) {
-  //   await sendDelirio(ctx, next);
-  //   return;
-  // }
   const senderPhotos = await ctx.api.getUserProfilePhotos(
     receivedMessage.from?.id as number,
   );
@@ -30,13 +26,13 @@ lazer.command("lazer", async (ctx, next) => {
 
   if (senderPhotos.total_count > 0) {
     const [senderPhotoDetails] = senderPhotos.photos;
-    const [, , senderPhoto] = senderPhotoDetails;
+    const senderPhoto = senderPhotoDetails[2] ?? senderPhotoDetails[senderPhotoDetails.length - 1];
     const senderPhotoImage = await ctx.api.getFile(senderPhoto.file_id);
     senderPhotoFile = await senderPhotoImage.download();
   }
   if (receiverPhotos.total_count > 0) {
     const [receiverPhotoDetails] = receiverPhotos.photos;
-    const [, , receiverPhoto] = receiverPhotoDetails;
+    const receiverPhoto = receiverPhotoDetails[2] ?? receiverPhotoDetails[receiverPhotoDetails.length - 1];
 
     const receiverPhotoImage = await ctx.api.getFile(receiverPhoto.file_id);
     receiverPhotoFile = await receiverPhotoImage.download();
@@ -46,3 +42,9 @@ lazer.command("lazer", async (ctx, next) => {
     ...replyToReply(ctx),
   });
 });
+
+export const lazerModule: BotModule = {
+  command: "lazer",
+  composer: lazer,
+  shortDescription: "Responda alguém com /lazer",
+};

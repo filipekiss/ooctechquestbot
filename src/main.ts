@@ -1,20 +1,23 @@
 import { FileApiFlavor, hydrateFiles } from "@grammyjs/files";
 import { hydrate } from "@grammyjs/hydrate";
 import { Api, Bot, Composer, InputFile } from "grammy";
-import { acende } from "./acende";
+import { acendeModule } from "./acende";
 import { badumtsModule } from "./badumts";
 import { OocContext, setup } from "./config";
-import { BOT_TOKEN } from "./config/environment";
+import { BOT_TOKEN, QUOTES_CHANNEL_ID } from "./config/environment";
 import { deliriosModule } from "./delirio";
 import { keyboardModule } from "./keyboard";
-import { lazer } from "./lazer";
+import { lazerModule } from "./lazer";
 import { oocModule } from "./ooc";
 import { paolica } from "./paolica";
+import { perdoaModule } from "./perdao";
+import { db } from "./libs/db";
+import { createQuoteModule } from "./quote";
+import { createQuoteStore } from "./quote/store";
 import { referral } from "./referral";
 import { repetidaModule } from "./repetida";
 import { revoltaModule } from "./revolta";
 import { salpicao } from "./salpicao";
-import { simpleReply } from "./simple-reply";
 import { replyToSender } from "./utils/message";
 
 setup();
@@ -37,6 +40,15 @@ const addToRegister =
     return register.set(key, value);
   };
 const addToCommandRegister = addToRegister(commandRegister);
+
+const { module: quoteModule, shortcut: quoteShortcut } = createQuoteModule({
+  store: createQuoteStore(db),
+  channelId: QUOTES_CHANNEL_ID,
+  reservedWords: () => [
+    ...commandRegister.keys(),
+    ...[...commandRegister.values()].flatMap((botModule) => botModule.alias ?? []),
+  ],
+});
 
 const bot = new Bot<OocContext, FileApiFlavor<Api>>(BOT_TOKEN);
 const addModuleToBot = (module: BotModule) => {
@@ -112,6 +124,10 @@ const help = (commandsRegister: any) => {
   return helpModule;
 };
 
+bot.catch((err) => {
+  console.error(`Error handling update ${err.ctx.update.update_id}:`, err.error);
+});
+
 bot.use(hydrate());
 addModuleToBot(oocModule);
 addModuleToBot(badumtsModule);
@@ -119,34 +135,16 @@ addModuleToBot(deliriosModule);
 addModuleToBot(keyboardModule);
 addModuleToBot(repetidaModule);
 addModuleToBot(revoltaModule);
+addModuleToBot(perdoaModule);
+addModuleToBot(lazerModule);
+addModuleToBot(acendeModule);
+addModuleToBot(quoteModule);
 bot.use(help(commandRegister));
-bot.use(lazer);
-bot.use(simpleReply);
 bot.use(paolica);
 bot.use(salpicao);
 bot.use(referral);
-bot.use(acende);
-
-// bot.inlineQuery(/quotes (.*)/, async (ctx) => {
-//   const match = ctx.match;
-//   const [, query] = match as RegExpMatchArray;
-//   const foundQuotes = await dbClient.quote.findMany({
-//     where: {
-//       key: {
-//         contains: query,
-//       },
-//     },
-//   });
-//   const inlineResults = foundQuotes.map((quote) => {
-//     return InlineQueryResultBuilder.article(
-//       `quote-${quote.key}-${quote.id}`,
-//       quote.key,
-//     ).text(`Use o comando /${quote.key} para enviar a quote`);
-//   });
-//   await ctx.answerInlineQuery(inlineResults, {
-//     cache_time: 300,
-//   });
-// });
+// Must stay last: any /<key> that no command handled is looked up as a quote
+bot.use(quoteShortcut);
 
 bot.start({
   onStart: async (me) => {
@@ -171,12 +169,5 @@ bot.start({
           };
         }),
     );
-    // Set the election timeouts
-    // setPresidaCallback(async (CHAT_ID) => {
-    //   const parsedMessage = await getElectionResultsMessage();
-    //   await bot.api.sendMessage(CHAT_ID, parsedMessage, {
-    //     ...sendAsMarkdown,
-    //   });
-    // });
   },
 });

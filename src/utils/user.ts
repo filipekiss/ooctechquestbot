@@ -9,5 +9,5 @@ export const isAdmin = async (context: OocContext) => {
 export const getUsernameOrFullname = (user: User) => {
   return user.username
     ? `@${user.username}`
-    : `${user.first_name} ${user.last_name}`.trimEnd();
+    : [user.first_name, user.last_name].filter(Boolean).join(" ");
 };
