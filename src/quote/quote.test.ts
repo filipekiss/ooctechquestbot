@@ -12,7 +12,8 @@ const BOB = { id: 2, is_bot: false, first_name: "Bob", last_name: "B" };
 
 function setup(opts: { forwardFails?: boolean; admin?: boolean } = {}) {
   let clock = 1_700_000_000;
-  const store = createQuoteStore(openDb(":memory:"));
+  const db = openDb(":memory:");
+  const store = createQuoteStore(db);
   const { module, shortcut } = createQuoteModule({
     store,
     channelId: "-100",
@@ -60,7 +61,7 @@ function setup(opts: { forwardFails?: boolean; admin?: boolean } = {}) {
     } as any);
   const sent = () => calls.filter((c) => c.method === "sendMessage").map((c) => c.payload.text);
   const target = { message_id: 55, date: 1699999999, chat: CHAT, from: BOB, text: "hello world" };
-  return { store, calls, say, sent, advance: (seconds: number) => (clock += seconds), target, setForwardFails: (v: boolean) => (failForwards = v) };
+  return { db, store, calls, say, sent, advance: (seconds: number) => (clock += seconds), target, setForwardFails: (v: boolean) => (failForwards = v) };
 }
 
 test("add stores quote, archives to channel and pre-renders image", async () => {
@@ -71,6 +72,18 @@ test("add stores quote, archives to channel and pre-renders image", async () => 
   assert.equal(row.author_name, "Bob B");
   assert.equal(row.image_file_id, "FILE");
   assert.ok(t.calls.some((c) => c.method === "forwardMessage" && c.payload.chat_id === "-100"));
+});
+
+test("add credits the original author of a forwarded message", async () => {
+  const t = setup();
+  const carol = { id: 3, is_bot: false, first_name: "Carol" };
+  await t.say("/quote add a", { reply_to_message: { ...t.target, forward_from: carol, forward_date: 1600000000 } });
+  assert.equal(t.store.get("10", "a")!.author_name, "Carol");
+  assert.equal(t.store.get("10", "a")!.author_id, 3);
+  const users = t.db.prepare("SELECT telegram_id, first_name FROM users ORDER BY telegram_id").all();
+  assert.deepEqual(users.map((u: any) => u.telegram_id), [ALICE.id, 3]);
+  await t.say("/quote add b", { reply_to_message: { ...t.target, message_id: 56, forward_sender_name: "Hidden Dan" } });
+  assert.equal(t.store.get("10", "b")!.author_name, "Bob B");
 });
 
 test("rejects reserved, duplicate keys and already quoted messages", async () => {

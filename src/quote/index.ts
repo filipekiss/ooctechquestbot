@@ -1,4 +1,5 @@
 import { Api, Composer, GrammyError, InputFile } from "grammy";
+import type { User } from "@grammyjs/types";
 import { OocContext } from "../config";
 import { QUOTES_CHANNEL_ID } from "../config/environment";
 import type { BotModule } from "../main";
@@ -142,6 +143,8 @@ export function createQuoteModule({
       console.warn("Unable to archive quote", error);
       return reply("Não consegui salvar essa mensagem no canal de quotes");
     }
+    // forwarded messages credit the original author; hidden senders fall back to the forwarder
+    const author = (target as { forward_from?: User }).forward_from ?? target.from;
     const newQuote: NewQuote = {
       chat_id: chatId,
       key,
@@ -149,8 +152,8 @@ export function createQuoteModule({
       source_message_id: target.message_id,
       text: target.text ?? null,
       message_date: target.date,
-      author_id: target.from.id,
-      author_name: getUsernameOrFullname(target.from),
+      author_id: author.id,
+      author_name: getUsernameOrFullname(author),
       added_by_id: ctx.from!.id,
       added_by_name: getUsernameOrFullname(ctx.from!),
       image_file_id: null,
@@ -163,6 +166,8 @@ export function createQuoteModule({
       }
     }
     store.add(newQuote);
+    store.saveUser(author);
+    store.saveUser(ctx.from!);
     return reply(`Pronto! Envie /quote ${key} (ou só /${key}) pra citar essa mensagem`);
   };
 

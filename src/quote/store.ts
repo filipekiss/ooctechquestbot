@@ -1,4 +1,5 @@
 import type Database from "better-sqlite3";
+import type { User } from "@grammyjs/types";
 
 export type QuoteRow = {
   id: number;
@@ -42,6 +43,17 @@ export const createQuoteStore = (db: Database.Database) => ({
            @message_date, @author_id, @author_name, @added_by_id, @added_by_name, @image_file_id, unixepoch(), unixepoch())`,
       )
       .run(quote),
+
+  saveUser: (user: User) =>
+    db
+      .prepare(
+        `INSERT INTO users (telegram_id, username, first_name, last_name, updated_at)
+         VALUES (@id, @username, @first_name, @last_name, unixepoch())
+         ON CONFLICT (telegram_id) DO UPDATE SET username = excluded.username,
+           first_name = excluded.first_name, last_name = excluded.last_name,
+           updated_at = excluded.updated_at`,
+      )
+      .run({ username: null, last_name: null, ...user }),
 
   keys: (chatId: string) =>
     (

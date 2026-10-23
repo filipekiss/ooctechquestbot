@@ -42,6 +42,16 @@ const migrations: string[] = [
   ALTER TABLE quotes ADD COLUMN refreshed_at INTEGER NOT NULL DEFAULT 0;
   UPDATE quotes SET refreshed_at = created_at;
   `,
+  // telegram profile of everyone who adds a quote or is quoted
+  `
+  CREATE TABLE users (
+    telegram_id INTEGER PRIMARY KEY,
+    username TEXT,
+    first_name TEXT NOT NULL,
+    last_name TEXT,
+    updated_at INTEGER NOT NULL
+  );
+  `,
 ];
 
 export function migrate(db: Database.Database) {
