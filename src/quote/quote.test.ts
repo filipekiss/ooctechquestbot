@@ -67,7 +67,7 @@ function setup(opts: { forwardFails?: boolean; admin?: boolean } = {}) {
 test("add stores quote, archives to channel and pre-renders image", async () => {
   const t = setup();
   await t.say("/quote add Oi", { reply_to_message: t.target });
-  const row = t.store.get("10", "oi")!;
+  const row = t.store.get("oi")!;
   assert.equal(row.channel_message_id, 500);
   assert.equal(row.author_name, "Bob B");
   assert.equal(row.image_file_id, "FILE");
@@ -78,12 +78,12 @@ test("add credits the original author of a forwarded message", async () => {
   const t = setup();
   const carol = { id: 3, is_bot: false, first_name: "Carol" };
   await t.say("/quote add a", { reply_to_message: { ...t.target, forward_from: carol, forward_date: 1600000000 } });
-  assert.equal(t.store.get("10", "a")!.author_name, "Carol");
-  assert.equal(t.store.get("10", "a")!.author_id, 3);
+  assert.equal(t.store.get("a")!.author_name, "Carol");
+  assert.equal(t.store.get("a")!.author_id, 3);
   const users = t.db.prepare("SELECT telegram_id, first_name FROM users ORDER BY telegram_id").all();
   assert.deepEqual(users.map((u: any) => u.telegram_id), [ALICE.id, 3]);
   await t.say("/quote add b", { reply_to_message: { ...t.target, message_id: 56, forward_sender_name: "Hidden Dan" } });
-  assert.equal(t.store.get("10", "b")!.author_name, "Bob B");
+  assert.equal(t.store.get("b")!.author_name, "Bob B");
 });
 
 test("rejects reserved, duplicate keys and already quoted messages", async () => {
@@ -94,7 +94,7 @@ test("rejects reserved, duplicate keys and already quoted messages", async () =>
   await t.say("/quote add oi", { reply_to_message: t.target });
   await t.say("/quote add oi", { reply_to_message: { ...t.target, message_id: 56 } });
   await t.say("/quote add outra", { reply_to_message: t.target });
-  assert.deepEqual(t.store.keys("10"), ["oi"]);
+  assert.deepEqual(t.store.keys(), ["oi"]);
   assert.equal(t.sent().filter((m) => m.includes("Já existe")).length, 1);
   assert.equal(t.sent().filter((m) => m.includes("já é uma quote")).length, 1);
 });
@@ -107,7 +107,7 @@ test("/quote key and /key forward from the channel and count uses", async () => 
   await t.say("/oi@testbot");
   await t.say("/oi@otherbot");
   await t.say("/nope");
-  assert.equal(t.store.get("10", "oi")!.uses, 3);
+  assert.equal(t.store.get("oi")!.uses, 3);
   const forwards = t.calls.filter((c) => c.method === "forwardMessage" && String(c.payload.chat_id) === "10");
   assert.equal(forwards.length, 3);
   assert.equal(forwards[0].payload.message_id, 500);
@@ -127,7 +127,7 @@ test("media quote without text reports expired instead of an image", async () =>
   const t = setup();
   const media = { message_id: 57, date: 1, chat: CHAT, from: BOB, photo: [{ file_id: "p" }] };
   await t.say("/quote add foto", { reply_to_message: media });
-  assert.equal(t.store.get("10", "foto")!.text, null);
+  assert.equal(t.store.get("foto")!.text, null);
   t.setForwardFails(true);
   await t.say("/foto");
   assert.ok(t.sent().some((m) => m.includes("expirou")));
@@ -137,7 +137,7 @@ test("remove is admin only, list and stats work", async () => {
   const user = setup();
   await user.say("/quote add oi", { reply_to_message: user.target });
   await user.say("/quote remove oi");
-  assert.ok(user.store.get("10", "oi"));
+  assert.ok(user.store.get("oi"));
   await user.say("/quote list");
   await user.say("/quote stats");
   await user.say("/quote stats oi");
@@ -148,14 +148,14 @@ test("remove is admin only, list and stats work", async () => {
   const admin = setup({ admin: true });
   await admin.say("/quote add oi", { reply_to_message: admin.target });
   await admin.say("/quote remove oi");
-  assert.equal(admin.store.get("10", "oi"), undefined);
+  assert.equal(admin.store.get("oi"), undefined);
 });
 
 test("reposts a copy older than 3 months to the channel on use, only once", async () => {
   const t = setup();
   const DAY = 24 * 60 * 60;
   await t.say("/quote add oi", { reply_to_message: t.target });
-  t.store.setChannelMessage(t.store.get("10", "oi")!.id, 500, 1_700_000_000);
+  t.store.setChannelMessage(t.store.get("oi")!.id, 500, 1_700_000_000);
   const repost = () =>
     t.calls.filter((c) => c.method === "forwardMessage" && c.payload.chat_id === "-100" && c.payload.from_chat_id === "-100");
 
@@ -167,7 +167,7 @@ test("reposts a copy older than 3 months to the channel on use, only once", asyn
   await t.say("/oi");
   assert.equal(repost().length, 1);
   assert.equal(repost()[0].payload.message_id, 500);
-  const row = t.store.get("10", "oi")!;
+  const row = t.store.get("oi")!;
   assert.equal(row.channel_message_id, 501);
   const toChat = t.calls.filter((c) => c.method === "forwardMessage" && String(c.payload.chat_id) === "10");
   assert.equal(toChat.at(-1)!.payload.message_id, 501);

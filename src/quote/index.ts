@@ -112,7 +112,6 @@ export function createQuoteModule({
   const addQuote = async (ctx: OocContext, rawKey: string | undefined) => {
     const reply = (text: string) =>
       retryOnFlood(() => ctx.reply(text, { ...replyToSender(ctx) }));
-    const chatId = String(ctx.chat!.id);
     const target = ctx.message!.reply_to_message;
     if (!target?.from) {
       return reply("Você precisa responder a uma mensagem pra adicionar uma quote");
@@ -127,10 +126,10 @@ export function createQuoteModule({
     if ([...BUILTIN_WORDS, ...reservedWords()].includes(key)) {
       return reply(`Você não pode usar "${key}" como chave de quote`);
     }
-    if (store.get(chatId, key)) {
+    if (store.get(key)) {
       return reply("Já existe uma quote com essa chave");
     }
-    const existing = store.getBySourceMessage(chatId, target.message_id);
+    const existing = store.getBySourceMessage(target.message_id);
     if (existing) {
       return reply(`Essa mensagem já é uma quote. Tente /quote ${existing.key}`);
     }
@@ -146,7 +145,6 @@ export function createQuoteModule({
     // forwarded messages credit the original author; hidden senders fall back to the forwarder
     const author = (target as { forward_from?: User }).forward_from ?? target.from;
     const newQuote: NewQuote = {
-      chat_id: chatId,
       key,
       channel_message_id: copy.message_id,
       source_message_id: target.message_id,
@@ -172,16 +170,15 @@ export function createQuoteModule({
   };
 
   const showStats = async (ctx: OocContext, key: string | undefined) => {
-    const chatId = String(ctx.chat!.id);
     const reply = (text: string) => ctx.reply(text, { ...replyToSender(ctx) });
     if (key) {
-      const quote = store.get(chatId, key.toLowerCase());
+      const quote = store.get(key.toLowerCase());
       if (!quote) return reply(`Não encontrei nenhuma quote com a chave ${key}`);
       return reply(
         `A quote foi adicionada por ${quote.added_by_name} e é de autoria de ${quote.author_name}. Ela foi usada ${quote.uses} vez${quote.uses === 1 ? "" : "es"}`,
       );
     }
-    const stats = store.stats(chatId);
+    const stats = store.stats();
     const lines = [`Quantidade de quotes: ${stats.quotes}`, `Usos no total: ${stats.uses}`];
     if (stats.topAuthor) {
       lines.push(`Usuário mais citado: ${stats.topAuthor.name} (${stats.topAuthor.total})`);
@@ -199,7 +196,6 @@ export function createQuoteModule({
       return next();
     }
     const [action, key] = ctx.match.trim().split(/\s+/);
-    const chatId = String(ctx.chat.id);
     switch (action?.toLowerCase()) {
       case undefined:
       case "":
@@ -209,7 +205,7 @@ export function createQuoteModule({
         await addQuote(ctx, key);
         break;
       case "list": {
-        const keys = store.keys(chatId);
+        const keys = store.keys();
         const text = keys.length ? keys.map((k) => `/${k}`).join("\n") : "Não tenho nenhuma quote registrada";
         await reply(text.length > 4000 ? `${text.slice(0, 4000)}\n…` : text);
         break;
@@ -226,7 +222,7 @@ export function createQuoteModule({
           await reply("Use /quote remove chave");
         } else {
           await reply(
-            store.remove(chatId, key.toLowerCase())
+            store.remove(key.toLowerCase())
               ? "Quote removida"
               : `Não encontrei nenhuma quote com a chave ${key}`,
           );
@@ -234,7 +230,7 @@ export function createQuoteModule({
         break;
       }
       default: {
-        const quote = store.get(chatId, action.toLowerCase());
+        const quote = store.get(action.toLowerCase());
         if (quote) {
           await sendQuote(ctx, quote);
         } else {
@@ -250,7 +246,7 @@ export function createQuoteModule({
     if (!channelId || !match) return next();
     const [, key, botName] = match;
     if (botName && botName.toLowerCase() !== ctx.me.username.toLowerCase()) return next();
-    const quote = store.get(String(ctx.chat.id), key.toLowerCase());
+    const quote = store.get(key.toLowerCase());
     if (!quote) return next();
     await sendQuote(ctx, quote);
     await next();

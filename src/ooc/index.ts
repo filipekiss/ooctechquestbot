@@ -43,8 +43,7 @@ async function archiveMessage(ctx: OocContext, next: NextFunction) {
     return;
   }
 
-  const chatId = String(receivedMessage.chat.id);
-  if (oocStore.has(chatId, messageToQuote.message_id)) {
+  if (oocStore.has(messageToQuote.message_id)) {
     await replyAlreadyQuoted(ctx);
     await next();
     return;
@@ -52,7 +51,6 @@ async function archiveMessage(ctx: OocContext, next: NextFunction) {
   const recordOoc = () => {
     if (!messageToQuote.from || !receivedMessage.from) return;
     oocStore.add({
-      chat_id: chatId,
       source_message_id: messageToQuote.message_id,
       author_id: messageToQuote.from.id,
       author_name: getUsernameOrFullname(messageToQuote.from),
@@ -101,7 +99,7 @@ ooc.command("ooc", async (ctx, next) => {
   await archiveMessage(ctx, next);
 });
 ooc.command("oocstats", async (ctx, next) => {
-  const stats = oocStore.stats(String(ctx.chat.id), ctx.from!.id);
+  const stats = oocStore.stats(ctx.from!.id);
   const output: string[] = [`Mensagens encaminhadas: ${stats.total}`];
   if (stats.topAuthor) {
     output.push(`Usuário mais encaminhado: ${stats.topAuthor.name}`);
