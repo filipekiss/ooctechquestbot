@@ -1,0 +1,13 @@
+/* dash80 base: reset and page-level rules. html/body are inert inside a shadow
+ * root, so :host carries the same defaults there (text, background, font, glow).
+ * `:host` never matches in a normal page, so server-rendered apps are unaffected.
+ * The `*`, `a`, `.sr` and :focus-visible rules also apply inside a shadow root. */
+* { box-sizing:border-box; }
+html { background:var(--bg); }
+body { margin:0; min-height:100vh; background:radial-gradient(ellipse at 50% 30%,var(--bg-glow),var(--bg) 70%); color:var(--c);
+  font:var(--fs-base)/var(--lh-base) var(--mono); text-shadow:0 0 6px var(--glow-c-text); overflow-x:hidden; }
+:host { background:radial-gradient(ellipse at 50% 30%,var(--bg-glow),var(--bg) 70%); color:var(--c);
+  font:var(--fs-base)/var(--lh-base) var(--mono); text-shadow:0 0 6px var(--glow-c-text); }
+a { color:var(--c); }
+.sr { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+:focus-visible { outline:2px solid var(--g); outline-offset:2px; box-shadow:0 0 10px var(--g); }

@@ -1,0 +1,106 @@
+/* dash80 components. Needs tokens.css. Classes only, no element resets except
+ * textarea/password (they are the .field), so it also works in a Lit shadow root.
+ *   .panel (h2/.label engraved amber label)  .gauge  .readout
+ *   .led (.g .a .r, .on, .blink)  .btn (.primary .danger .ghost .big .on)
+ *   .field  .sw  .scanner  .bar  .list  .badge  .err  .muted  .table */
+
+.panel { position:relative; background:linear-gradient(180deg,var(--panel-top),var(--panel)); border:1px solid var(--edge); border-radius:var(--radius-5);
+  padding:var(--sp-4); margin-top:1.1rem; box-shadow:inset 0 2px 10px var(--shadow-ink),inset 0 0 0 1px var(--shadow-ink),0 1px 0 var(--edge-lip); }
+.panel h2, .label { margin:0 0 .7rem; font-size:var(--fs-md); font-weight:700; letter-spacing:var(--track-3); text-transform:uppercase; color:var(--a);
+  text-shadow:0 0 6px var(--glow-a-text),0 1px 0 var(--shadow-ink); }
+
+.gauge { display:inline-flex; flex-direction:column; gap:var(--sp-1); }
+.gauge .label { margin:0; font-size:var(--fs-xs); }
+.readout { display:inline-block; background:var(--well); border:1px solid var(--edge); border-radius:var(--radius-2); padding:var(--sp-1) .6rem;
+  box-shadow:inset 0 1px 6px var(--shadow-ink); font-variant-numeric:tabular-nums; letter-spacing:var(--track-1); color:var(--g); text-shadow:0 0 6px var(--glow-g-text); text-transform:uppercase; }
+
+.led { display:inline-flex; align-items:center; gap:.45rem; font-size:var(--fs-sm); letter-spacing:var(--track-2); text-transform:uppercase; color:var(--c); }
+.led::before { content:""; width:.8rem; height:.8rem; border-radius:50%; background:var(--led-off); border:1px solid var(--border-ink); box-shadow:inset 0 1px 2px rgba(255,255,255,.12); }
+.led.on::before { background:var(--g); box-shadow:0 0 8px var(--g),0 0 16px var(--g); }
+.led.a.on::before { background:var(--a); box-shadow:0 0 8px var(--a),0 0 16px var(--a); }
+.led.r.on::before { background:var(--r); box-shadow:0 0 8px var(--r),0 0 16px var(--r); }
+.led.on.blink::before { animation:blink var(--blink) steps(2,start) infinite; }
+@keyframes blink { to { opacity:.2; } }
+
+.btn { display:inline-block; font:inherit; font-size:var(--fs-lg); font-weight:700; letter-spacing:var(--track-1); text-transform:uppercase; text-decoration:none;
+  color:var(--a); background:linear-gradient(180deg,var(--a-key),var(--a-dim)); border:1px solid var(--border-ink); border-radius:var(--radius-3); padding:var(--sp-2) .9rem; cursor:pointer;
+  box-shadow:0 0 0 1px var(--a-ring),0 var(--key-travel) 0 var(--shadow-ink),0 0 10px color-mix(in srgb,var(--a) 25%,transparent); text-shadow:0 0 6px color-mix(in srgb,var(--a) 70%,transparent); }
+.btn:hover { color:var(--a-hi); }
+.btn:active { transform:translateY(var(--key-travel)); box-shadow:0 0 0 1px var(--a-ring),0 0 6px color-mix(in srgb,var(--a) 40%,transparent); }
+.btn.on { background:var(--a); color:var(--a-ink); text-shadow:none; box-shadow:0 0 0 1px var(--a),0 var(--key-travel) 0 var(--shadow-ink),0 0 14px var(--a); }
+.btn.primary { color:var(--g); background:linear-gradient(180deg,var(--g-key),var(--g-dim)); box-shadow:0 0 0 1px var(--g-ring),0 var(--key-travel) 0 var(--shadow-ink),0 0 12px color-mix(in srgb,var(--g) 35%,transparent);
+  text-shadow:0 0 6px var(--g); }
+.btn.primary:hover { color:var(--g-hi); }
+.btn.danger { color:var(--r); background:linear-gradient(180deg,var(--r-key),var(--r-dim)); box-shadow:0 0 0 1px var(--r-ring),0 var(--key-travel) 0 var(--shadow-ink); text-shadow:0 0 6px var(--r); }
+.btn.ghost { background:none; box-shadow:0 0 0 1px var(--edge); }
+.btn.big { font-size:var(--fs-xl); padding:.7rem 1.6rem; }
+.btn:disabled { opacity:.45; cursor:default; transform:none; }
+
+.field, textarea, input[type=password] { width:100%; background:var(--well); color:var(--c); border:1px solid var(--edge); border-radius:var(--radius-2); padding:var(--sp-2) .7rem;
+  font:inherit; text-shadow:inherit; box-shadow:inset 0 2px 8px var(--shadow-ink); caret-color:var(--c); }
+textarea { resize:none; overflow:hidden; min-height:9rem; }
+::placeholder { color:var(--placeholder); }
+
+.sw { display:inline-flex; background:var(--well); border:1px solid var(--edge); border-radius:var(--radius-4); padding:3px; gap:3px; box-shadow:inset 0 2px 6px var(--shadow-ink); }
+.sw button { font:inherit; font-size:var(--fs-md); letter-spacing:var(--track-1); text-transform:uppercase; color:var(--a); background:var(--a-dim); border:1px solid var(--border-ink);
+  border-radius:var(--radius-2); padding:.4rem var(--sp-3); cursor:pointer; box-shadow:0 var(--key-travel-sm) 0 var(--shadow-ink); }
+.sw button[aria-pressed=true] { background:var(--a); color:var(--a-ink); text-shadow:none; box-shadow:0 0 12px var(--a); transform:translateY(var(--key-travel-sm)); }
+
+.scanner { display:block; position:relative; height:.8rem; min-width:7rem; border:1px solid var(--border-ink); border-radius:var(--radius-1); overflow:hidden; box-shadow:inset 0 0 4px var(--shadow-ink);
+  background:repeating-linear-gradient(90deg,var(--r-dim) 0 8px,var(--shadow-ink) 8px 10px); }
+.scanner[hidden] { display:none; }
+.scanner b { position:absolute; top:0; bottom:0; left:0; width:32%; animation:sweep var(--sweep) ease-in-out infinite alternate;
+  background:linear-gradient(90deg,transparent,var(--r) 70%,var(--r-hi));
+  -webkit-mask:repeating-linear-gradient(90deg,#000 0 8px,transparent 8px 10px); mask:repeating-linear-gradient(90deg,#000 0 8px,transparent 8px 10px);
+  filter:drop-shadow(0 0 6px var(--r)); }
+@keyframes sweep { from { left:0; } to { left:68%; } }
+
+/* generic app pieces */
+.bar { display:flex; flex-wrap:wrap; gap:var(--sp-3) var(--sp-4); align-items:flex-end; margin:var(--sp-3) 0; }
+.err { margin:var(--sp-3) 0 0; padding:var(--sp-2) var(--sp-3); border-left:3px solid var(--r); background:var(--r-dim); text-shadow:0 0 6px var(--r); color:var(--r-text); }
+.err[hidden] { display:none; }
+.err + .btn { margin-top:var(--sp-3); }  /* error message directly above a button */
+.muted { color:var(--a-muted); font-size:var(--fs-lg); text-shadow:none; }
+.badge { background:var(--g); color:var(--g-ink); border-radius:var(--radius-pill); padding:0 .45rem; font-size:.75rem; box-shadow:0 0 8px var(--g); text-shadow:none; }
+
+/* trip-computer list: amber rows, .new row lit green */
+.list { list-style:none; margin:0; padding:0; }
+.list li { border-top:1px solid var(--edge); padding:.6rem var(--sp-1) .6rem 1.4rem; position:relative; color:var(--c); text-shadow:0 0 5px color-mix(in srgb,var(--c) 35%,transparent); }
+.list li:first-child { border-top:0; }
+.list li::before { content:""; position:absolute; left:var(--sp-1); top:1rem; width:.55rem; height:.55rem; border-radius:50%; background:var(--c-dim); }
+.list li.new { color:var(--g); text-shadow:0 0 5px color-mix(in srgb,var(--g) 40%,transparent); }
+.list li.new::before { background:var(--g); box-shadow:0 0 8px var(--g); }
+.list .bar { margin:.4rem 0 0; align-items:center; }
+.list .btn { padding:.3rem .6rem; font-size:var(--fs-sm); }
+
+/* data table: styling only (rows, virtualization and filtering stay in the app) */
+.table { width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums; color:var(--c); }
+.table th { position:sticky; top:0; background:var(--panel); text-align:left; font-size:var(--fs-md); font-weight:700; letter-spacing:var(--track-3);
+  text-transform:uppercase; color:var(--a); text-shadow:0 0 6px var(--glow-a-text),0 1px 0 var(--shadow-ink); padding:var(--sp-2) .7rem; border-bottom:2px solid var(--edge); }
+.table td { padding:var(--sp-2) .7rem; border-top:1px solid var(--edge); }
+.table tbody tr:first-child td { border-top:0; }
+.table tbody tr:hover { background:var(--panel-top); color:var(--c-hi); }
+.table tbody tr.sel, .table tbody tr[aria-selected=true] { background:var(--a-dim); color:var(--g); }
+
+@media (prefers-reduced-motion:reduce) {
+  *, *::before, *::after { animation:none !important; transition:none !important; }
+  .scanner b { left:34%; }
+  body, .btn, .led, .readout { text-shadow:none; }
+}
+
+@media (prefers-contrast:more) {
+  *, *::before, *::after { text-shadow:none !important; }
+}
+
+/* forced colors: background-only drawing disappears, so use system colors and borders */
+@media (forced-colors:active) {
+  :focus-visible { outline:2px solid Highlight; box-shadow:none; }
+  .panel, .readout, .field, textarea, input[type=password], .sw, .list li, .table th, .table td { border-color:CanvasText; }
+  .btn, .sw button { forced-color-adjust:none; background:ButtonFace; color:ButtonText; border:2px solid ButtonText; box-shadow:none; }
+  .btn:disabled { color:GrayText; border-color:GrayText; }
+  .btn.on, .sw button[aria-pressed=true] { background:Highlight; color:HighlightText; border-color:HighlightText; }
+  .badge { forced-color-adjust:none; background:Highlight; color:HighlightText; border:1px solid CanvasText; box-shadow:none; }
+  .led::before { forced-color-adjust:none; background:Canvas; border:2px solid CanvasText; box-shadow:none; }
+  .led.on::before, .led.a.on::before, .led.r.on::before { background:Highlight; border-color:Highlight; box-shadow:none; }
+  .list li::before { forced-color-adjust:none; background:CanvasText; }
+}

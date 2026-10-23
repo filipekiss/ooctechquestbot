@@ -1,0 +1,14 @@
+/* dash80 CRT effects, opt-in.
+ *  .crt        on <body>: scanlines + vignette fixed over the whole viewport.
+ *  .crt-scope  on any container, or the `crt` attribute on a custom element's host
+ *              (:host([crt])): the same overlays, absolutely positioned inside that
+ *              box only. The container becomes position:relative and isolated. */
+.crt::before, .crt::after { content:""; position:fixed; inset:0; pointer-events:none; z-index:9; }
+.crt::before { background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 1px,transparent 1px 3px); }
+.crt::after { background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.65)); }
+
+.crt-scope, :host([crt]) { position:relative; isolation:isolate; }
+.crt-scope::before, .crt-scope::after, :host([crt])::before, :host([crt])::after { content:""; position:absolute; inset:0; pointer-events:none; z-index:9; }
+.crt-scope::before, :host([crt])::before { background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 1px,transparent 1px 3px); }
+.crt-scope::after, :host([crt])::after { background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.65)); }
+@media (prefers-contrast:more), (forced-colors:active) { .crt::before, .crt::after, .crt-scope::before, .crt-scope::after, :host([crt])::before, :host([crt])::after { display:none; } }

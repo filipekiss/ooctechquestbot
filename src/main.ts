@@ -4,7 +4,8 @@ import { Api, Bot, Composer, InputFile } from "grammy";
 import { acendeModule } from "./acende";
 import { badumtsModule } from "./badumts";
 import { OocContext, setup } from "./config";
-import { BOT_TOKEN, QUOTES_CHANNEL_ID } from "./config/environment";
+import { BOT_TOKEN, DASHBOARD_PORT, QUOTES_CHANNEL_ID } from "./config/environment";
+import { BotInfo, startDashboard } from "./dashboard";
 import { deliriosModule } from "./delirio";
 import { keyboardModule } from "./keyboard";
 import { lazerModule } from "./lazer";
@@ -146,8 +147,18 @@ bot.use(referral);
 // Must stay last: any /<key> that no command handled is looked up as a quote
 bot.use(quoteShortcut);
 
+const botInfo: BotInfo = { startedAt: Date.now() / 1000, commands: [] };
+if (DASHBOARD_PORT) {
+  startDashboard({ db, port: DASHBOARD_PORT, info: botInfo });
+}
+
 bot.start({
   onStart: async (me) => {
+    botInfo.username = me.username;
+    botInfo.id = me.id;
+    botInfo.commands = [...commandRegister.values()]
+      .filter((m) => m.command && m.shortDescription)
+      .map((m) => ({ command: m.command as string, description: m.shortDescription as string }));
     console.log(`Started...`);
     console.log(`Bot username is ${me.username} (id: ${me.id})`);
 

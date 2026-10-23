@@ -1,0 +1,9 @@
+main { max-width: 64rem; margin: 0 auto; padding: 1rem; }
+nav.bar { margin-bottom: 1rem; flex-wrap: wrap; }
+.row { display: flex; flex-wrap: wrap; gap: .8rem 1.2rem; align-items: center; }
+.grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); }
+.scroll { overflow-x: auto; margin: .8rem 0; }
+form.bar { gap: .6rem; margin-bottom: .6rem; }
+form.bar .field { flex: 1; min-width: 10rem; }
+pre { margin: 0; white-space: pre-wrap; word-break: break-word; font: inherit; }
+.nw { white-space: nowrap; }

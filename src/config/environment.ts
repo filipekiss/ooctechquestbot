@@ -28,6 +28,8 @@ export const AMAZON_AFFILIATE_TAG: string =
 
 export const QUOTES_CHANNEL_ID: string = process.env.QUOTES_CHANNEL_ID ?? "";
 
+export const DASHBOARD_PORT: number = Number(process.env.DASHBOARD_PORT) || 0;
+
 export const BOT_USERNAME: string = process.env.BOT_USERNAME ?? "";
 
 export const DEFAULT_ASSETS_FOLDER =
